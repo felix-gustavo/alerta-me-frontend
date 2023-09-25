@@ -19,7 +19,7 @@ class AuthorizationServiceImpl implements IAuthorizationService {
     if (accessToken == null) throw SessionExpiredException();
 
     final response = await _httpClient.post(
-      '/authorization',
+      '/authorizations',
       data: {'elderly': email},
       token: accessToken,
     );
@@ -33,7 +33,7 @@ class AuthorizationServiceImpl implements IAuthorizationService {
     if (accessToken == null) throw SessionExpiredException();
 
     final response = await _httpClient.get(
-      '/authorization/user',
+      '/authorizations/user',
       token: accessToken,
     );
 

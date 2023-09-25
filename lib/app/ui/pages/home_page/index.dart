@@ -10,8 +10,10 @@ import '../../../shared/extensions/iterable_extension.dart';
 import '../../../stores/auth/auth_store.dart';
 import '../../../stores/authorization/load_autorization/load_authorization_store.dart';
 import '../../../stores/medical_reminder/load_medical_reminder/load_medical_reminder_store.dart';
+import '../../../stores/medication_reminder/load_medication_reminder/load_medication_reminder_store.dart';
 import '../../../stores/water_reminder/load_water_reminder/load_water_reminder_store.dart';
 import 'widgets/medical_reminder/index.dart';
+import 'widgets/medication_reminder/index.dart';
 import 'widgets/sidebar.dart';
 import 'widgets/water_reminder/index.dart';
 
@@ -27,6 +29,7 @@ class _HomePageState extends State<HomePage>
   late LoadAuthorizationStore _loadAuthorizationStore;
   late LoadWaterReminderStore _loadWaterReminderStore;
   late LoadMedicalReminderStore _loadMedicalReminderStore;
+  late LoadMedicationReminderStore _loadMedicationReminderStore;
 
   late AuthStore _authStore;
 
@@ -47,6 +50,11 @@ class _HomePageState extends State<HomePage>
     );
 
     _loadMedicalReminderStore = Provider.of<LoadMedicalReminderStore>(
+      context,
+      listen: false,
+    );
+
+    _loadMedicationReminderStore = Provider.of<LoadMedicationReminderStore>(
       context,
       listen: false,
     );
@@ -75,6 +83,7 @@ class _HomePageState extends State<HomePage>
         _loadAuthorizationStore.run(),
         _loadWaterReminderStore.run(),
         _loadMedicalReminderStore.run(),
+        _loadMedicationReminderStore.run()
       ]);
     });
   }
@@ -191,6 +200,7 @@ class _HomePageState extends State<HomePage>
                     ),
                   ),
                   const WaterReminderWidget(),
+                  const MedicationReminderWidget(),
                   const MedicalReminderWidget(),
                 ].separator(const SizedBox(height: 12)).toList(),
               ),

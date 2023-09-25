@@ -14,7 +14,6 @@ import '../../../../../shared/extensions/iterable_extension.dart';
 import '../../../../../shared/extensions/time_of_day_extension.dart';
 import '../../../../../stores/water_reminder/edit_water_reminder/edit_water_reminder_store.dart';
 import '../../../../../stores/water_reminder/load_water_reminder/load_water_reminder_store.dart';
-import '../../../../buttons/my_outlined_button.dart';
 import '../../../../common_components/my_time_range_picker.dart';
 import '../../../../common_components/my_timeline.dart';
 import '../../../../common_components/redirect_to_login.dart';
@@ -345,9 +344,9 @@ class _WaterReminderEditWidgetState extends State<WaterReminderEditWidget> {
               builder: (_) {
                 return Visibility(
                   visible: _editWaterReminderStore.loading,
-                  replacement: MyOutlinedButton(
-                    text: 'Salvar',
+                  replacement: ElevatedButton(
                     onPressed: _submit,
+                    child: const Text('Salvar'),
                   ),
                   child: const CircularProgressIndicator(),
                 );

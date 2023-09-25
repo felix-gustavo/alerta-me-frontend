@@ -47,8 +47,12 @@ O processo de autorização requer que a pessoa idosa tenha feito login
 <details>
 <summary>Como realizar um pedido de autorização?</summary>
 
-No canto inferior esquerdo, clique em `CONFIGURAÇÕES` ![Alt text](readme-assets/settings.png)
+No canto inferior esquerdo, clique em `CONFIGURAÇÕES` 
+
+![Alt text](readme-assets/settings.png)
+
 Preencha o campo com o email da pessoa idosa e clique em `Registrar pedido`
+
 ![Alt text](readme-assets/authorization.png)
 
 </details>
@@ -149,7 +153,7 @@ Desenvolvimento do website:
 - [x] Configuração de lembrete de água
 - [x] Criação de lembrete de consulta
 - [x] Edição de lembrete de consulta
-- [ ] Criação de lembrete de medicamentos
+- [x] Criação de lembrete de medicamentos
 - [ ] ...
 
 Ao concluir o cadastro e a edição de todos os lembretes no website, o desenvolvimento da skill e do website ocorrerá simultaneamente.

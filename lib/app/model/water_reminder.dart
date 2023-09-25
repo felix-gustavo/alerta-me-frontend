@@ -30,8 +30,8 @@ class WaterReminder {
     final end = map['end'] as int;
 
     return WaterReminder(
-      start: start.intFormatToTimeOfDay,
-      end: end.intFormatToTimeOfDay,
+      start: start.intHHMMSSToTimeOfDay,
+      end: end.intHHMMSSToTimeOfDay,
       interval: map['interval'] as int,
       amount: map['amount'] as int,
     );

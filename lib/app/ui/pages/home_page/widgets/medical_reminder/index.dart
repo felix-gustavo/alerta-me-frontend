@@ -54,34 +54,13 @@ class _MedicalReminderWidgetState extends State<MedicalReminderWidget> {
   }
 
   Widget _buildLoading() {
-    return SizedBox(
-      width: 327,
-      child: Column(
-        children: [
-          const SkeletonLine(style: SkeletonLineStyle()),
-          const SizedBox(height: 3),
-          const SkeletonLine(style: SkeletonLineStyle()),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              const SkeletonLine(
-                style: SkeletonLineStyle(width: 21, height: 21),
-              ),
-              const SkeletonLine(
-                style: SkeletonLineStyle(width: 120, height: 21),
-              ),
-              const Spacer(),
-              const SkeletonLine(
-                style: SkeletonLineStyle(width: 21, height: 21),
-              ),
-              const SkeletonLine(
-                  style: SkeletonLineStyle(width: 46, height: 21)),
-            ].separator(const SizedBox(width: 15)).toList(),
-          ),
-          const SizedBox(height: 12),
-          const SkeletonLine(style: SkeletonLineStyle()),
-        ],
-      ),
+    return Column(
+      children: [
+        const SkeletonLine(style: SkeletonLineStyle(width: 135)),
+        const SkeletonLine(),
+        const SkeletonLine(),
+        const SkeletonLine(),
+      ].separator(const SizedBox(height: 6)).toList(),
     );
   }
 
@@ -90,7 +69,7 @@ class _MedicalReminderWidgetState extends State<MedicalReminderWidget> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Não há lembretes',
+          'Não há lembretes recentes',
           style: Theme.of(context).textTheme.titleMedium,
         ),
         const SizedBox(height: 9),
@@ -185,23 +164,25 @@ class _MedicalReminderWidgetState extends State<MedicalReminderWidget> {
           page: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              if (medicalReminders.isNotEmpty)
-                IntrinsicWidth(
-                  child: LabeledCheckbox(
-                    label: 'Mostrar todas as consultas',
-                    onChanged: (value) async {
-                      await _loadMedicalReminderStore.run(withPast: value);
-                      setState(() => _showPastReminders = value);
-                    },
-                    padding: const EdgeInsets.all(6),
-                    value: _showPastReminders,
-                  ),
-                ),
-              _loadMedicalReminderStore.loading
-                  ? _buildLoading()
-                  : medicalReminders.isNotEmpty
-                      ? _buildReminders(medicalReminders)
-                      : _buildNoReminder(),
+              ..._loadMedicalReminderStore.loading
+                  ? [_buildLoading()]
+                  : [
+                      IntrinsicWidth(
+                        child: LabeledCheckbox(
+                          label: 'Mostrar todas as consultas',
+                          onChanged: (value) async {
+                            await _loadMedicalReminderStore.run(
+                                withPast: value);
+                            setState(() => _showPastReminders = value);
+                          },
+                          padding: const EdgeInsets.all(6),
+                          value: _showPastReminders,
+                        ),
+                      ),
+                      medicalReminders.isNotEmpty
+                          ? _buildReminders(medicalReminders)
+                          : _buildNoReminder(),
+                    ],
             ],
           ),
           pageName: 'Consultas',

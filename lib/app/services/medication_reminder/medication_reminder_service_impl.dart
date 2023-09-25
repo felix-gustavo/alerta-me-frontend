@@ -1,47 +1,43 @@
 import 'package:firebase_auth/firebase_auth.dart';
 
 import '../../exceptions/exceptions_impl.dart';
-import '../../model/medical_reminder.dart';
+import '../../model/medication_reminder.dart';
 
 import '../auth/auth_service.dart';
 import '../http/http_client.dart';
-import 'medical_reminder_service.dart';
+import 'medication_reminder_service.dart';
 
-class MedicalReminderServiceImpl implements IMedicalReminderService {
+class MedicationReminderServiceImpl implements IMedicationReminderService {
   final IHttpClient _httpClient;
   final FirebaseAuth _auth;
 
-  MedicalReminderServiceImpl({
+  MedicationReminderServiceImpl({
     required IHttpClient httpClient,
     required IAuthService authService,
   })  : _httpClient = httpClient,
         _auth = FirebaseAuth.instance;
 
   @override
-  Future<List<MedicalReminder>> get({required bool withPast}) async {
+  Future<List<MedicationReminder>> get() async {
     final accessToken = await _auth.currentUser?.getIdToken();
     if (accessToken == null) throw SessionExpiredException();
 
-    final Map<String, dynamic> queryParameters = {
-      'withPast': true,
-    };
-
     final response = await _httpClient.get(
-      '/medical-reminders',
+      '/medication-reminders',
       token: accessToken,
-      queryParameters: withPast ? queryParameters : null,
     );
 
     if (response.data == null) return [];
     final responseList = (response.data as List);
 
     return responseList
-        .map((medical) => MedicalReminder.fromMap(medical))
-        .toList();
+        .map((medication) => MedicationReminder.fromMap(medication))
+        .toList()
+      ..sort((m1, m2) => m1.name.compareTo(m2.name));
   }
 
   @override
-  Future<MedicalReminder> createOrUpdate(MedicalReminder data) async {
+  Future<MedicationReminder> createOrUpdate(MedicationReminder data) async {
     final accessToken = await _auth.currentUser?.getIdToken();
     if (accessToken == null) throw SessionExpiredException();
 
@@ -49,18 +45,18 @@ class MedicalReminderServiceImpl implements IMedicalReminderService {
 
     final request = data.id?.isNotEmpty ?? false
         ? _httpClient.put(
-            '/medical-reminders/${data.id}',
+            '/medication-reminders/${data.id}',
             token: accessToken,
             data: dataToSave,
           )
         : _httpClient.post(
-            '/medical-reminders',
+            '/medication-reminders',
             token: accessToken,
             data: dataToSave,
           );
 
     final response = await request;
 
-    return MedicalReminder.fromMap(response.data);
+    return MedicationReminder.fromMap(response.data);
   }
 }

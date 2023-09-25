@@ -10,12 +10,15 @@ import 'services/auth/auth_service_impl.dart';
 import 'services/authorization/authorization_service_impl.dart';
 import 'services/http/http_client_dio_impl.dart';
 import 'services/medical_reminder/medical_reminder_service_impl.dart';
+import 'services/medication_reminder/medication_reminder_service_impl.dart';
 import 'services/users/users_service_impl.dart';
 import 'services/water_reminder/water_reminder_service_impl.dart';
 import 'stores/authorization/create_autorization/create_autorization_store.dart';
 import 'stores/authorization/load_autorization/load_authorization_store.dart';
 import 'stores/medical_reminder/edit_medical_reminder/edit_medical_reminder_store.dart';
 import 'stores/medical_reminder/load_medical_reminder/load_medical_reminder_store.dart';
+import 'stores/medication_reminder/edit_medication_reminder/edit_medication_reminder_store.dart';
+import 'stores/medication_reminder/load_medication_reminder/load_medication_reminder_store.dart';
 import 'stores/water_reminder/edit_water_reminder/edit_water_reminder_store.dart';
 import 'stores/water_reminder/load_water_reminder/load_water_reminder_store.dart';
 
@@ -76,6 +79,22 @@ class App extends StatelessWidget {
         Provider<LoadMedicalReminderStore>(
           create: (_) => LoadMedicalReminderStore(
             medicalReminderService: MedicalReminderServiceImpl(
+              httpClient: HttpClientDioImpl.instance,
+              authService: authService,
+            ),
+          ),
+        ),
+        Provider<EditMedicationReminderStore>(
+          create: (_) => EditMedicationReminderStore(
+            medicationReminderService: MedicationReminderServiceImpl(
+              httpClient: HttpClientDioImpl.instance,
+              authService: authService,
+            ),
+          ),
+        ),
+        Provider<LoadMedicationReminderStore>(
+          create: (_) => LoadMedicationReminderStore(
+            medicationReminderService: MedicationReminderServiceImpl(
               httpClient: HttpClientDioImpl.instance,
               authService: authService,
             ),

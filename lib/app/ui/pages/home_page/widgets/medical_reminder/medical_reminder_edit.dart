@@ -8,6 +8,7 @@ import 'package:provider/provider.dart';
 
 import '../../../../../exceptions/exceptions_impl.dart';
 import '../../../../../model/medical_reminder.dart';
+import '../../../../../shared/extensions/app_styles_extension.dart';
 import '../../../../../shared/extensions/colors_app_extension.dart';
 import '../../../../../shared/extensions/datetime_extension.dart';
 import '../../../../../shared/extensions/iterable_extension.dart';
@@ -15,7 +16,6 @@ import '../../../../../shared/extensions/string_extension.dart';
 import '../../../../../shared/extensions/time_of_day_extension.dart';
 import '../../../../../stores/medical_reminder/edit_medical_reminder/edit_medical_reminder_store.dart';
 import '../../../../../stores/medical_reminder/load_medical_reminder/load_medical_reminder_store.dart';
-import '../../../../buttons/my_outlined_button.dart';
 import '../../../../common_components/redirect_to_login.dart';
 
 class MedicalReminderEditWidget extends StatefulWidget {
@@ -309,10 +309,18 @@ class _MedicalReminderEditWidgetState extends State<MedicalReminderEditWidget> {
           Observer(
             builder: (context) => _editMedicalReminderStore.loading
                 ? const Center(child: CircularProgressIndicator())
-                : Align(
-                    alignment: Alignment.center,
-                    child: MyOutlinedButton(onPressed: _submit, text: 'Salvar'),
-                  ),
+                : context.isMobile
+                    ? ElevatedButton(
+                        onPressed: _submit,
+                        child: const Text('Salvar'),
+                      )
+                    : Align(
+                        alignment: Alignment.center,
+                        child: ElevatedButton(
+                          onPressed: _submit,
+                          child: const Text('Salvar'),
+                        ),
+                      ),
           ),
         ].separator(const SizedBox(height: 12)).toList(),
       ),

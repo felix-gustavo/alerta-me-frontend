@@ -23,7 +23,7 @@ class WaterReminderServiceImpl implements IWaterReminderService {
     if (accessToken == null) throw SessionExpiredException();
 
     final response = await _httpClient.get(
-      '/water-reminder',
+      '/water-reminders',
       token: accessToken,
     );
 
@@ -41,12 +41,12 @@ class WaterReminderServiceImpl implements IWaterReminderService {
 
     final request = update
         ? _httpClient.put(
-            '/water-reminder',
+            '/water-reminders',
             token: accessToken,
             data: data.toMap(),
           )
         : _httpClient.post(
-            '/water-reminder',
+            '/water-reminders',
             token: accessToken,
             data: data.toMap(),
           );

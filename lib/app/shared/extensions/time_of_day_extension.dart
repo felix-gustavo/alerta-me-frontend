@@ -32,4 +32,12 @@ extension TimeOfDayExtension on TimeOfDay {
     final minutes = minute.clamp(0, 59);
     return hours * 60 + minutes;
   }
+
+  int compareTo(TimeOfDay other) {
+    if (hour < other.hour) return -1;
+    if (hour > other.hour) return 1;
+    if (minute < other.minute) return -1;
+    if (minute > other.minute) return 1;
+    return 0;
+  }
 }

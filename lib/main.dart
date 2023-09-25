@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:form_validator/form_validator.dart';
 
 import 'app/app.dart';
-import 'app/config/easy_loading_config.dart';
 import 'firebase_options.dart';
 
 void main() async {
@@ -22,7 +21,6 @@ void main() async {
     };
 
     runApp(const App());
-    EasyLoadingConfig.setup();
   }, (error, stackTrace) {
     debugPrint('error: $error');
     debugPrint('Others catching runtimeType ${error.runtimeType}');

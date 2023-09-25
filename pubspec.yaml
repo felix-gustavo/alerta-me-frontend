@@ -29,6 +29,7 @@ dependencies:
   expandable_page_view: ^1.0.17
   firebase_auth: ^4.9.0
   firebase_core: ^2.15.1
+  mask_text_input_formatter: ^2.5.0
   
 dev_dependencies:
   flutter_test:

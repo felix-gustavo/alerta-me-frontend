@@ -85,145 +85,131 @@ class _WaterReminderWidgetState extends State<WaterReminderWidget>
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Flexible(
-          child: Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              border: Border.all(color: context.colors.lightGrey),
-              borderRadius: const BorderRadius.all(Radius.circular(6)),
-            ),
-            child: Wrap(
-              alignment: WrapAlignment.spaceAround,
-              runSpacing: 24,
-              spacing: 24,
-              children: [
-                MyTimeRangePicker.small(
-                  key: ValueKey(range),
-                  start: startTime,
-                  end: endTime,
-                  readonly: true,
-                ),
-                ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 258),
-                  child: Column(
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            'Quantidade de água',
-                            style: textTheme.bodyMedium!
-                                .copyWith(color: context.colors.grey),
-                          ),
-                          Text(
-                            '${(waterReminder.amount / 1000).toStringAsFixed(2)} L',
-                            style: textTheme.bodyMedium,
-                          ),
-                        ],
-                      ),
-                      const Divider(height: 15),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            'Total de lembretes',
-                            style: Theme.of(context)
-                                .textTheme
-                                .bodyMedium!
-                                .copyWith(color: context.colors.grey),
-                          ),
-                          Text(
-                            ((range.convertToMinutes / waterReminder.interval) +
-                                    1)
-                                .ceil()
-                                .toString(),
-                            style: textTheme.bodyMedium,
-                          ),
-                        ],
-                      ),
-                      const Divider(height: 15),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            'Início',
-                            style: Theme.of(context)
-                                .textTheme
-                                .bodyMedium!
-                                .copyWith(color: context.colors.grey),
-                          ),
-                          Text(startTime.toHHMM, style: textTheme.bodyMedium),
-                        ],
-                      ),
-                      const Divider(height: 15),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            'Fim',
-                            style: Theme.of(context)
-                                .textTheme
-                                .bodyMedium!
-                                .copyWith(color: context.colors.grey),
-                          ),
-                          Text(endTime.toHHMM, style: textTheme.bodyMedium),
-                        ],
-                      ),
-                      const Divider(height: 15),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            'Intervalo',
-                            style: Theme.of(context)
-                                .textTheme
-                                .bodyMedium!
-                                .copyWith(color: context.colors.grey),
-                          ),
-                          Text(
-                            '${waterReminder.interval.toString()} min',
-                            style: textTheme.bodyMedium,
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-                SizedBox(
-                  width: context.screenWidth < 1280
-                      ? null
-                      : context.screenWidth < 1400
-                          ? context.screenWidth * .43
-                          : context.screenWidth * .48,
-                  height: 192,
-                  child: const Placeholder(
-                    child: Center(child: Text('HISTÓRICO PREVIEW')),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-        const SizedBox(height: 12),
         Container(
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
             border: Border.all(color: context.colors.lightGrey),
             borderRadius: const BorderRadius.all(Radius.circular(6)),
           ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          child: Wrap(
+            alignment: WrapAlignment.spaceAround,
+            runSpacing: 24,
+            spacing: 9,
             children: [
-              Text(
-                'Linha do tempo (24h)',
-                style:
-                    textTheme.bodyMedium!.copyWith(color: context.colors.grey),
-              ),
-              const SizedBox(height: 33),
-              MyTimeline(
+              MyTimeRangePicker.small(
+                key: ValueKey(range),
                 start: startTime,
                 end: endTime,
-                interval: waterReminder.interval,
+                readonly: true,
+              ),
+              SizedBox(
+                width: 258,
+                child: Column(
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Quantidade de água',
+                          style: textTheme.bodyMedium!
+                              .copyWith(color: context.colors.grey),
+                        ),
+                        Text(
+                          '${(waterReminder.amount / 1000).toStringAsFixed(2)} L',
+                          style: textTheme.bodyMedium,
+                        ),
+                      ],
+                    ),
+                    const Divider(height: 15),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Total de lembretes',
+                          style: Theme.of(context)
+                              .textTheme
+                              .bodyMedium!
+                              .copyWith(color: context.colors.grey),
+                        ),
+                        Text(
+                          ((range.convertToMinutes / waterReminder.interval) +
+                                  1)
+                              .ceil()
+                              .toString(),
+                          style: textTheme.bodyMedium,
+                        ),
+                      ],
+                    ),
+                    const Divider(height: 15),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Início',
+                          style: Theme.of(context)
+                              .textTheme
+                              .bodyMedium!
+                              .copyWith(color: context.colors.grey),
+                        ),
+                        Text(startTime.toHHMM, style: textTheme.bodyMedium),
+                      ],
+                    ),
+                    const Divider(height: 15),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Fim',
+                          style: Theme.of(context)
+                              .textTheme
+                              .bodyMedium!
+                              .copyWith(color: context.colors.grey),
+                        ),
+                        Text(endTime.toHHMM, style: textTheme.bodyMedium),
+                      ],
+                    ),
+                    const Divider(height: 15),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Intervalo',
+                          style: Theme.of(context)
+                              .textTheme
+                              .bodyMedium!
+                              .copyWith(color: context.colors.grey),
+                        ),
+                        Text(
+                          '${waterReminder.interval.toString()} min',
+                          style: textTheme.bodyMedium,
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(
+                width: context.screenWidth > 1400
+                    ? context.screenWidth * .48
+                    : context.screenWidth > 1200
+                        ? context.screenWidth * .39
+                        : null,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Linha do tempo (24h)',
+                      style: textTheme.bodyMedium!
+                          .copyWith(color: context.colors.grey),
+                    ),
+                    const SizedBox(height: 33),
+                    MyTimeline(
+                      start: startTime,
+                      end: endTime,
+                      interval: waterReminder.interval,
+                    ),
+                  ],
+                ),
               ),
             ],
           ),

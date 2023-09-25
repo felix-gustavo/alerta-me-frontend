@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 extension IntExtension on int {
-  TimeOfDay get intFormatToTimeOfDay {
+  TimeOfDay get intHHMMSSToTimeOfDay {
     int hours = this ~/ 10000;
     int minutes = (this % 10000) ~/ 100;
     int seconds = this % 100;
@@ -9,6 +9,16 @@ extension IntExtension on int {
     hours = hours.clamp(0, 23);
     minutes = minutes.clamp(0, 59);
     seconds = seconds.clamp(0, 59);
+
+    return TimeOfDay(hour: hours, minute: minutes);
+  }
+
+  TimeOfDay get intHHMMToTimeOfDay {
+    int hours = this ~/ 100;
+    int minutes = this % 100;
+
+    hours = hours.clamp(0, 23);
+    minutes = minutes.clamp(0, 59);
 
     return TimeOfDay(hour: hours, minute: minutes);
   }
