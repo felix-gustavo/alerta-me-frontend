@@ -1,6 +1,7 @@
 import 'package:expandable_page_view/expandable_page_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
+import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:mobx/mobx.dart';
 import 'package:provider/provider.dart';
 
@@ -143,7 +144,7 @@ class _MedicalReminderEditWidgetState
     });
 
     if (!hasDuplicateTime) {
-      await _editMedicationReminderStore.run(data: _medicationReminder).then(
+      await _editMedicationReminderStore.run(data: medicationReminder).then(
         (_) {
           final navigator = Navigator.of(context);
 
@@ -171,7 +172,7 @@ class _MedicalReminderEditWidgetState
             );
           },
           child: Text(
-            'VOLTAR',
+            'Voltar',
             style: textTheme.bodyMedium!.copyWith(
               color: context.colors.grey,
             ),
@@ -200,7 +201,7 @@ class _MedicalReminderEditWidgetState
           }
         },
         child: Text(
-          'CONTINUAR',
+          'Continuar',
           style: textTheme.bodyMedium!.copyWith(color: Colors.white),
         ),
       ),
@@ -250,23 +251,34 @@ class _MedicalReminderEditWidgetState
               ),
             ],
           ),
-          const SizedBox(height: 12),
-          AnimatedCrossFade(
-            firstChild: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children:
-                  controlButtons.separator(const SizedBox(height: 12)).toList(),
-            ),
-            secondChild: Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children:
-                  controlButtons.separator(const SizedBox(width: 12)).toList(),
-            ),
-            crossFadeState: context.isMobile
-                ? CrossFadeState.showFirst
-                : CrossFadeState.showSecond,
-            duration: const Duration(milliseconds: 402),
-            sizeCurve: Curves.decelerate,
+          const SizedBox(height: 21),
+          Observer(
+            builder: (_) {
+              return _editMedicationReminderStore.loading
+                  ? const Align(
+                      alignment: Alignment.centerRight,
+                      child: CircularProgressIndicator(),
+                    )
+                  : AnimatedCrossFade(
+                      firstChild: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: controlButtons
+                            .separator(const SizedBox(height: 12))
+                            .toList(),
+                      ),
+                      secondChild: Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: controlButtons
+                            .separator(const SizedBox(width: 12))
+                            .toList(),
+                      ),
+                      crossFadeState: context.isMobile
+                          ? CrossFadeState.showFirst
+                          : CrossFadeState.showSecond,
+                      duration: const Duration(milliseconds: 402),
+                      sizeCurve: Curves.decelerate,
+                    );
+            },
           ),
         ],
       ),

@@ -117,6 +117,9 @@ class _MedicationReminderDoseSectionState
                             defaultDosage)
                         .time
                         .toHHMM,
+                    style: textTheme.bodyMedium!.copyWith(
+                      color: context.colors.primary,
+                    ),
                   ),
                 ),
                 const Divider(),

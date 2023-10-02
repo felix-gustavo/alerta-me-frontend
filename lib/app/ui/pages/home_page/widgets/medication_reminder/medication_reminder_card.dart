@@ -27,7 +27,6 @@ class _MedicalReminderCardState extends State<MedicationReminderCard> {
       padding: const EdgeInsets.symmetric(vertical: 1.2),
       margin: const EdgeInsets.all(3),
       decoration: BoxDecoration(
-        // border: Border.all(color: context.colors.lightGrey),
         borderRadius: BorderRadius.circular(3),
         color: context.colors.primaryLight,
       ),
@@ -45,89 +44,97 @@ class _MedicalReminderCardState extends State<MedicationReminderCard> {
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
 
-    final child = Column(
-      children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 12),
-          child: Text(
-            widget.medicationReminder.name,
-            style: textTheme.bodyLarge,
-            textAlign: TextAlign.justify,
-            overflow: TextOverflow.ellipsis,
+    final hasDosages = widget.medicationReminder.dose.entries
+        .any((dose) => dose.value != null);
+
+    final child = IntrinsicWidth(
+      child: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 12),
+            child: Text(
+              widget.medicationReminder.name,
+              style: textTheme.bodyLarge,
+              textAlign: TextAlign.justify,
+              overflow: TextOverflow.ellipsis,
+            ),
           ),
-        ),
-        Flexible(
-          child: Row(
-            children: widget.medicationReminder.dose.entries
-                .map(
-                  (entry) => SizedBox(
-                    width: 57,
-                    child: Container(
-                      decoration: BoxDecoration(
-                        border: Border(
-                          right: entry.key.index ==
-                                  widget.medicationReminder.dose.length
-                              ? BorderSide.none
-                              : BorderSide(
-                                  color:
-                                      context.colors.lightGrey.withOpacity(.33),
-                                ),
-                        ),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          Container(
-                            decoration: BoxDecoration(
-                              border: Border(
-                                top: BorderSide(
-                                  color: context.colors.lightGrey,
-                                ),
-                              ),
-                            ),
-                            margin: const EdgeInsets.only(bottom: 3),
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 6),
-                              child: Text(
-                                entry.key.namePtBrShort,
-                                textAlign: TextAlign.center,
-                                style: textTheme.bodyMedium!.copyWith(
-                                  color: context.colors.grey,
-                                ),
-                              ),
-                            ),
-                          ),
-                          ...entry.value
-                                  ?.asMap()
-                                  .map((index, value) {
-                                    return MapEntry(
-                                      index,
-                                      index < 2
-                                          ? _buildChipTime(value)
-                                          : const SizedBox.shrink(),
-                                    );
-                                  })
-                                  .values
-                                  .toList() ??
-                              [SizedBox.fromSize()],
-                          if ((entry.value?.length ?? 0) > 2)
-                            Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 6),
-                              child: Icon(
-                                Icons.more_vert,
-                                color: context.colors.grey,
-                                size: 15,
-                              ),
-                            ),
-                        ],
-                      ),
+          const Divider(),
+          !hasDosages
+              ? Padding(
+                  padding: const EdgeInsets.all(6),
+                  child: Text(
+                    'Não há dosagens configuradas',
+                    style: textTheme.bodyMedium!.copyWith(
+                      color: context.colors.grey,
                     ),
                   ),
                 )
-                .toList(),
-          ),
-        ),
-      ].separator(const VerticalDivider()).toList(),
+              : Flexible(
+                  child: Row(
+                    children: widget.medicationReminder.dose.entries
+                        .map(
+                          (entry) => SizedBox(
+                            width: 57,
+                            child: Container(
+                              decoration: BoxDecoration(
+                                border: Border(
+                                  right: entry.key.index ==
+                                          widget.medicationReminder.dose.length
+                                      ? BorderSide.none
+                                      : BorderSide(
+                                          color: context.colors.lightGrey
+                                              .withOpacity(.33),
+                                        ),
+                                ),
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: [
+                                  Padding(
+                                    padding:
+                                        const EdgeInsets.symmetric(vertical: 6),
+                                    child: Text(
+                                      entry.key.namePtBrShort,
+                                      textAlign: TextAlign.center,
+                                      style: textTheme.bodyMedium!.copyWith(
+                                        color: context.colors.grey,
+                                      ),
+                                    ),
+                                  ),
+                                  ...entry.value
+                                          ?.asMap()
+                                          .map((index, value) {
+                                            return MapEntry(
+                                              index,
+                                              index < 2
+                                                  ? _buildChipTime(value)
+                                                  : const SizedBox.shrink(),
+                                            );
+                                          })
+                                          .values
+                                          .toList() ??
+                                      [SizedBox.fromSize()],
+                                  if ((entry.value?.length ?? 0) > 2)
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                          vertical: 6),
+                                      child: Icon(
+                                        Icons.more_vert,
+                                        color: context.colors.grey,
+                                        size: 15,
+                                      ),
+                                    ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        )
+                        .toList(),
+                  ),
+                ),
+        ].separator(const VerticalDivider()).toList(),
+      ),
     );
 
     return Container(

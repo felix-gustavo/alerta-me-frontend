@@ -12,6 +12,7 @@ import '../../../../../stores/medication_reminder/load_medication_reminder/load_
 import '../../../../common_components/container_reminder.dart';
 import '../../../../common_components/my_dialog.dart';
 import 'medication_reminder_card.dart';
+import 'medication_reminder_details.dart';
 import 'medication_reminder_edit.dart';
 
 class MedicationReminderWidget extends StatefulWidget {
@@ -87,10 +88,10 @@ class _MedicationReminderWidgetState extends State<MedicationReminderWidget> {
         onTap: () {
           showDialog(
             context: context,
-            builder: (_) => const MyDialog(
+            builder: (_) => MyDialog(
               title: 'Detalhes de Lembrete de Medicamento',
               confirmPop: false,
-              child: Text('Deve chamar tela de detalhes de medicamento'),
+              child: MedicationReminderDetails(medicationReminder: mr),
             ),
           );
         },
