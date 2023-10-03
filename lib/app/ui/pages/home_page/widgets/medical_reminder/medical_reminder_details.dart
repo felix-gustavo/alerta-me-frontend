@@ -1,7 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
+import 'package:flutter_mobx/flutter_mobx.dart';
+import 'package:mobx/mobx.dart';
+import 'package:provider/provider.dart';
 
 import '../../../../../model/medical_reminder.dart';
 import '../../../../../shared/extensions/colors_app_extension.dart';
+import '../../../../../stores/medical_reminder/delete_medical_reminder/delete_medical_reminder_store.dart';
+import '../../../../../stores/medical_reminder/load_medical_reminder/load_medical_reminder_store.dart';
 import '../../../../common_components/confirm_dialog.dart';
 import '../../../../common_components/expanded_section.dart';
 import 'medical_reminder_card.dart';
@@ -20,6 +26,10 @@ class MedicalReminderDetails extends StatefulWidget {
 }
 
 class _MedicalReminderDetailsState extends State<MedicalReminderDetails> {
+  late final DeleteMedicalReminderStore _deleteMedicalReminderStore;
+  late final LoadMedicalReminderStore _loadMedicalReminderStore;
+  late final ReactionDisposer _disposer;
+
   late bool _isExpanded;
 
   final GlobalKey _medicalReminderCardKey = GlobalKey();
@@ -34,11 +44,36 @@ class _MedicalReminderDetailsState extends State<MedicalReminderDetails> {
     _isExpanded = false;
     _medicalReminderEdit = widget.medicalReminder.copyWith();
 
+    _deleteMedicalReminderStore = Provider.of<DeleteMedicalReminderStore>(
+      context,
+      listen: false,
+    );
+
+    _loadMedicalReminderStore = Provider.of<LoadMedicalReminderStore>(
+      context,
+      listen: false,
+    );
+
+    _disposer = reaction(
+      (_) => _deleteMedicalReminderStore.medicalId,
+      (medicationId) {
+        if (medicationId != null) {
+          _loadMedicalReminderStore.removeMedicalReminder(medicationId);
+        }
+      },
+    );
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       setState(() {
         _medicalReminderCardWidth = getSize(_medicalReminderCardKey)?.width;
       });
     });
+  }
+
+  @override
+  void dispose() {
+    _disposer();
+    super.dispose();
   }
 
   Size? getSize(GlobalKey key) {
@@ -187,8 +222,37 @@ class _MedicalReminderDetailsState extends State<MedicalReminderDetails> {
     );
   }
 
+  void _doDelete() async {
+    final navigator = Navigator.of(context);
+
+    await showDialog(
+      context: context,
+      builder: (context) => ConfirmDialog(
+        title: 'Exclusão de lembrete de consulta',
+        content:
+            'O lembrete para a consulta com ${_medicalReminderEdit.medicName} será excluído, deseja realmente excluir?',
+        negativeBtnText: 'Não',
+        positiveBtnText: 'Sim',
+        onPostivePressed: () async {
+          final id = _medicalReminderEdit.id;
+          if (id != null) {
+            Navigator.of(context).pop();
+            await _deleteMedicalReminderStore.run(id: id).then((_) {
+              final errorMessage = _deleteMedicalReminderStore.errorMessage;
+              errorMessage != null
+                  ? EasyLoading.showError(errorMessage)
+                  : EasyLoading.showSuccess('Configuração salva');
+            }).whenComplete(() => navigator.pop());
+          }
+        },
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    print('widget.medicalReminder.id: ${widget.medicalReminder.id}');
+
     return LayoutBuilder(
       builder: (context, constraints) {
         const iconSize = 45.0;
@@ -202,10 +266,37 @@ class _MedicalReminderDetailsState extends State<MedicalReminderDetails> {
         return IntrinsicWidth(
           child: Column(
             children: [
-              _buildPreviewCards(
-                overflowed: overflowed,
-                iconSize: iconSize,
-                width: width,
+              Observer(
+                builder: (_) {
+                  return Stack(
+                    alignment: Alignment.topRight,
+                    children: [
+                      _buildPreviewCards(
+                        overflowed: overflowed,
+                        iconSize: iconSize,
+                        width: width,
+                      ),
+                      if (!_isExpanded)
+                        _deleteMedicalReminderStore.loading
+                            ? const Padding(
+                                padding: EdgeInsets.all(6),
+                                child: SizedBox.square(
+                                  dimension: 21,
+                                  child: CircularProgressIndicator(),
+                                ),
+                              )
+                            : IconButton(
+                                onPressed: _doDelete,
+                                icon: Icon(
+                                  Icons.delete,
+                                  color: context.colors.error,
+                                ),
+                                splashRadius: 3,
+                                iconSize: 21,
+                              ),
+                    ],
+                  );
+                },
               ),
               const SizedBox(height: 12),
               _buildEditSection(overflowed: overflowed, width: width),

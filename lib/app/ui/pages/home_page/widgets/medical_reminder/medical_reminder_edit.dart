@@ -8,7 +8,6 @@ import 'package:provider/provider.dart';
 
 import '../../../../../exceptions/exceptions_impl.dart';
 import '../../../../../model/medical_reminder.dart';
-import '../../../../../shared/extensions/app_styles_extension.dart';
 import '../../../../../shared/extensions/colors_app_extension.dart';
 import '../../../../../shared/extensions/datetime_extension.dart';
 import '../../../../../shared/extensions/iterable_extension.dart';
@@ -307,20 +306,15 @@ class _MedicalReminderEditWidgetState extends State<MedicalReminderEditWidget> {
                   ),
                 ],
           Observer(
-            builder: (context) => _editMedicalReminderStore.loading
-                ? const Center(child: CircularProgressIndicator())
-                : context.isMobile
-                    ? ElevatedButton(
-                        onPressed: _submit,
-                        child: const Text('Salvar'),
-                      )
-                    : Align(
-                        alignment: Alignment.center,
-                        child: ElevatedButton(
-                          onPressed: _submit,
-                          child: const Text('Salvar'),
-                        ),
-                      ),
+            builder: (_) => Align(
+              alignment: Alignment.centerRight,
+              child: _editMedicalReminderStore.loading
+                  ? const CircularProgressIndicator()
+                  : ElevatedButton(
+                      onPressed: _submit,
+                      child: const Text('Salvar'),
+                    ),
+            ),
           ),
         ].separator(const SizedBox(height: 12)).toList(),
       ),

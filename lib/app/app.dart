@@ -15,6 +15,7 @@ import 'services/users/users_service_impl.dart';
 import 'services/water_reminder/water_reminder_service_impl.dart';
 import 'stores/authorization/create_autorization/create_autorization_store.dart';
 import 'stores/authorization/load_autorization/load_authorization_store.dart';
+import 'stores/medical_reminder/delete_medical_reminder/delete_medical_reminder_store.dart';
 import 'stores/medical_reminder/edit_medical_reminder/edit_medical_reminder_store.dart';
 import 'stores/medical_reminder/load_medical_reminder/load_medical_reminder_store.dart';
 import 'stores/medication_reminder/delete_medication_reminder/delete_medication_reminder_store.dart';
@@ -71,6 +72,14 @@ class App extends StatelessWidget {
         ),
         Provider<EditMedicalReminderStore>(
           create: (_) => EditMedicalReminderStore(
+            medicalReminderService: MedicalReminderServiceImpl(
+              httpClient: HttpClientDioImpl.instance,
+              authService: authService,
+            ),
+          ),
+        ),
+        Provider<DeleteMedicalReminderStore>(
+          create: (_) => DeleteMedicalReminderStore(
             medicalReminderService: MedicalReminderServiceImpl(
               httpClient: HttpClientDioImpl.instance,
               authService: authService,

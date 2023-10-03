@@ -49,4 +49,14 @@ abstract class LoadMedicalReminderStoreBase with Store {
 
     medicalReminders = [...copy, mr];
   }
+
+  @action
+  void removeMedicalReminder(String id) {
+    final copy = [...medicalReminders];
+    final index = medicalReminders.indexWhere((e) => e.id == id);
+
+    if (index != -1) copy.removeAt(index);
+
+    medicalReminders = [...copy];
+  }
 }

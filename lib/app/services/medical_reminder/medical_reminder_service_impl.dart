@@ -63,4 +63,19 @@ class MedicalReminderServiceImpl implements IMedicalReminderService {
 
     return MedicalReminder.fromMap(response.data);
   }
+
+  @override
+  Future<String?> delete(String id) async {
+    final accessToken = await _auth.currentUser?.getIdToken();
+    if (accessToken == null) throw SessionExpiredException();
+
+    final request = _httpClient.delete(
+      '/medical-reminders/$id',
+      token: accessToken,
+    );
+
+    final httpResponseDto = await request;
+    final response = httpResponseDto.statusCode == 204 ? id : null;
+    return response;
+  }
 }
