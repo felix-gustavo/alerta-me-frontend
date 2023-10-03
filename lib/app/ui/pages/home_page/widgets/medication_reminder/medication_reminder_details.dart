@@ -1,9 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
+import 'package:flutter_mobx/flutter_mobx.dart';
+import 'package:mobx/mobx.dart';
+import 'package:provider/provider.dart';
 
 import '../../../../../model/medication_reminder.dart';
 import '../../../../../shared/extensions/colors_app_extension.dart';
 import '../../../../../shared/extensions/iterable_extension.dart';
 import '../../../../../shared/extensions/time_of_day_extension.dart';
+import '../../../../../stores/medication_reminder/delete_medication_reminder/delete_medication_reminder_store.dart';
+import '../../../../../stores/medication_reminder/load_medication_reminder/load_medication_reminder_store.dart';
+import '../../../../common_components/confirm_dialog.dart';
 import '../../../../common_components/my_dialog.dart';
 import 'medication_reminder_edit.dart';
 
@@ -22,18 +29,48 @@ class MedicationReminderDetails extends StatefulWidget {
 }
 
 class _MedicationReminderDetailsState extends State<MedicationReminderDetails> {
+  late final DeleteMedicationReminderStore _deleteMedicationReminderStore;
+  late final LoadMedicationReminderStore _loadMedicationReminderStore;
+
   final GlobalKey _rowDosageKey = GlobalKey();
   double? _maxWidth;
+
+  late final ReactionDisposer _disposer;
 
   @override
   void initState() {
     super.initState();
+
+    _deleteMedicationReminderStore = Provider.of<DeleteMedicationReminderStore>(
+      context,
+      listen: false,
+    );
+
+    _loadMedicationReminderStore = Provider.of<LoadMedicationReminderStore>(
+      context,
+      listen: false,
+    );
+
+    _disposer = reaction(
+      (_) => _deleteMedicationReminderStore.medicationId,
+      (medicationId) {
+        if (medicationId != null) {
+          _loadMedicationReminderStore.removeMedicationReminder(medicationId);
+        }
+      },
+    );
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       setState(() {
         _maxWidth = getSize(_rowDosageKey)?.width;
       });
     });
+  }
+
+  @override
+  void dispose() {
+    _disposer();
+    super.dispose();
   }
 
   Widget _buildContainer({required Widget child}) {
@@ -276,6 +313,49 @@ class _MedicationReminderDetailsState extends State<MedicationReminderDetails> {
     return null;
   }
 
+  void _doDelete() async {
+    final navigator = Navigator.of(context);
+
+    await showDialog(
+      context: context,
+      builder: (context) => ConfirmDialog(
+        title: 'Exclusão de lembrete de medicamento',
+        content:
+            'O lembrete para o medicamento ${widget._medReminder.name} será excluído, deseja realmente excluir?',
+        negativeBtnText: 'Não',
+        positiveBtnText: 'Sim',
+        onPostivePressed: () async {
+          final id = widget._medReminder.id;
+          if (id != null) {
+            Navigator.of(context).pop();
+            await _deleteMedicationReminderStore.run(id: id).then((_) {
+              final errorMessage = _deleteMedicationReminderStore.errorMessage;
+              errorMessage != null
+                  ? EasyLoading.showError(errorMessage)
+                  : EasyLoading.showSuccess('Configuração salva');
+            }).whenComplete(() => navigator.pop());
+          }
+        },
+      ),
+    );
+  }
+
+  void _goEditPage() {
+    Navigator.of(context).pop();
+    showDialog(
+      context: context,
+      builder: (_) => MyDialog(
+        title: 'Edição de Lembrete de Medicamento',
+        child: SizedBox(
+          width: 549,
+          child: MedicationReminderEditWidget(
+            medicationReminder: widget._medReminder,
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
@@ -283,48 +363,41 @@ class _MedicationReminderDetailsState extends State<MedicationReminderDetails> {
         final overflowed = (_maxWidth ?? 0) + 3 > constraints.maxWidth;
         final textTheme = Theme.of(context).textTheme;
 
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            overflowed ? _buildCardMobile() : _buildCard(),
-            const SizedBox(height: 12),
-            Row(
-              mainAxisSize: MainAxisSize.min,
+        return Observer(
+          builder: (_) {
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                TextButton(
-                  onPressed: () {},
-                  child: Text(
-                    'Excluir',
-                    style: textTheme.bodyMedium!.copyWith(
-                      color: context.colors.primary,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 15),
-                ElevatedButton(
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                    showDialog(
-                      context: context,
-                      builder: (_) => MyDialog(
-                        title: 'Edição de Lembrete de Medicamento',
-                        child: SizedBox(
-                          width: 549,
-                          child: MedicationReminderEditWidget(
-                            medicationReminder: widget._medReminder,
+                overflowed ? _buildCardMobile() : _buildCard(),
+                const SizedBox(height: 12),
+                _deleteMedicationReminderStore.loading
+                    ? const CircularProgressIndicator()
+                    : Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          TextButton(
+                            onPressed: _doDelete,
+                            child: Text(
+                              'Excluir',
+                              style: textTheme.bodyMedium!.copyWith(
+                                color: context.colors.primary,
+                              ),
+                            ),
                           ),
-                        ),
-                      ),
-                    );
-                  },
-                  child: Text(
-                    'Editar',
-                    style: textTheme.bodyMedium!.copyWith(color: Colors.white),
-                  ),
-                ),
+                          const SizedBox(width: 15),
+                          ElevatedButton(
+                            onPressed: _goEditPage,
+                            child: Text(
+                              'Editar',
+                              style: textTheme.bodyMedium!
+                                  .copyWith(color: Colors.white),
+                            ),
+                          ),
+                        ],
+                      )
               ],
-            )
-          ],
+            );
+          },
         );
       },
     );

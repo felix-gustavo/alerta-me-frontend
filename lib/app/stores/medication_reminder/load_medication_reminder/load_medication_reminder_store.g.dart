@@ -91,6 +91,18 @@ mixin _$LoadMedicationReminderStore on LoadMedicationReminderStoreBase, Store {
   }
 
   @override
+  void removeMedicationReminder(String id) {
+    final _$actionInfo =
+        _$LoadMedicationReminderStoreBaseActionController.startAction(
+            name: 'LoadMedicationReminderStoreBase.removeMedicationReminder');
+    try {
+      return super.removeMedicationReminder(id);
+    } finally {
+      _$LoadMedicationReminderStoreBaseActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
   String toString() {
     return '''
 medicationReminders: ${medicationReminders},

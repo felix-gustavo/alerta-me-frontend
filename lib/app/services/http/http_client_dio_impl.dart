@@ -80,35 +80,30 @@ class HttpClientDioImpl implements IHttpClient {
     }
   }
 
-  // @override
-  // Future<HttpResponseDto> delete(
-  //   String url, {
-  //   bool withToken = false,
-  // }) async {
-  //   Options? options;
-  //   if (withToken) {
-  //     final credentials = await storage.getCredentials();
-  //     if (credentials == null) throw AuthException();
+  @override
+  Future<HttpResponseDto> delete(
+    String url, {
+    String? token,
+  }) async {
+    try {
+      Options? options;
+      if (token != null) {
+        options = Options(headers: {'Authorization': 'Bearer $token'});
+      }
 
-  //     options = Options(
-  //       headers: {'Authorization': 'Bearer ${credentials.accessToken}'},
-  //     );
-  //   }
+      final response = await _dio.delete(
+        url,
+        options: options,
+      );
 
-  //   try {
-  //     final response = await _dio.delete(
-  //       url,
-  //       options: options,
-  //     );
-
-  //     return HttpResponseDto(
-  //       statusCode: response.statusCode ?? 500,
-  //       data: response.data,
-  //     );
-  //   } on DioError catch (e) {
-  //     throw e.error!;
-  //   }
-  // }
+      return HttpResponseDto(
+        statusCode: response.statusCode ?? 500,
+        data: response.data,
+      );
+    } on DioException catch (e) {
+      throw e.error!;
+    }
+  }
 
   @override
   Future<HttpResponseDto> get(

@@ -13,10 +13,10 @@ abstract class IHttpClient {
     String? token,
   });
 
-  // Future<HttpResponseDto> delete(
-  //   String url, {
-  //   bool withToken,
-  // });
+  Future<HttpResponseDto> delete(
+    String url, {
+    String? token,
+  });
 
   Future<HttpResponseDto> get(
     String url, {
