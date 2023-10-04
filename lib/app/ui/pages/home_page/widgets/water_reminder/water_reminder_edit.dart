@@ -33,13 +33,10 @@ class WaterReminderEditWidget extends StatefulWidget {
 class _WaterReminderEditWidgetState extends State<WaterReminderEditWidget> {
   late final GlobalKey<FormState> _formKey;
 
-  late TimeOfDay _start;
-  late TimeOfDay _end;
-  late TimeOfDay _range;
+  late WaterReminder _waterReminder;
 
-  late int _interval;
+  late TimeOfDay _range;
   late double _acc;
-  late int _amount;
 
   final ScrollController _timelineScollController = ScrollController();
 
@@ -53,12 +50,10 @@ class _WaterReminderEditWidgetState extends State<WaterReminderEditWidget> {
     super.initState();
     _formKey = GlobalKey<FormState>();
 
-    _start = widget.waterReminder?.start ?? const TimeOfDay(hour: 8, minute: 0);
-    _end = widget.waterReminder?.end ?? const TimeOfDay(hour: 12, minute: 0);
-    _range = _start.interval(_end);
-    _interval = widget.waterReminder?.interval ?? 35;
+    _waterReminder = widget.waterReminder ?? WaterReminder.empty();
+
+    _range = _waterReminder.start.interval(_waterReminder.end);
     _acc = _getCalculateAcc;
-    _amount = widget.waterReminder?.amount ?? 3000;
 
     _editWaterReminderStore =
         Provider.of<EditWaterReminderStore>(context, listen: false);
@@ -82,27 +77,28 @@ class _WaterReminderEditWidgetState extends State<WaterReminderEditWidget> {
     super.dispose();
   }
 
-  double get _getCalculateAcc => (_range.convertToMinutes / _interval) + 1;
+  double get _getCalculateAcc =>
+      (_range.convertToMinutes / _waterReminder.interval) + 1;
 
   void _onChangeInterval(int newInterval) {
     setState(() {
-      _interval = newInterval;
+      _waterReminder = _waterReminder.copyWith(interval: newInterval);
       _acc = _getCalculateAcc;
     });
   }
 
   void _onStartChange(TimeOfDay start) {
     setState(() {
-      _start = start;
-      _range = start.interval(_end);
+      _waterReminder = _waterReminder.copyWith(start: start);
+      _range = start.interval(_waterReminder.end);
       _acc = _getCalculateAcc;
     });
   }
 
   void _onEndChange(TimeOfDay end) {
     setState(() {
-      _end = end;
-      _range = _start.interval(end);
+      _waterReminder = _waterReminder.copyWith(end: end);
+      _range = _waterReminder.start.interval(end);
       _acc = _getCalculateAcc;
     });
   }
@@ -125,9 +121,9 @@ class _WaterReminderEditWidgetState extends State<WaterReminderEditWidget> {
           ),
           const SizedBox(height: 33),
           MyTimeline(
-            start: _start,
-            end: _end,
-            interval: _interval,
+            start: _waterReminder.start,
+            end: _waterReminder.end,
+            interval: _waterReminder.interval,
           ),
         ],
       ),
@@ -174,8 +170,8 @@ class _WaterReminderEditWidgetState extends State<WaterReminderEditWidget> {
                 : WrapAlignment.start,
             children: [
               MyTimeRangePicker(
-                start: _start,
-                end: _end,
+                start: _waterReminder.start,
+                end: _waterReminder.end,
                 onStartChange: _onStartChange,
                 onEndChange: _onEndChange,
               ),
@@ -198,14 +194,16 @@ class _WaterReminderEditWidgetState extends State<WaterReminderEditWidget> {
                                 color: context.colors.primary,
                                 splashRadius: 21,
                                 iconSize: 24,
-                                onPressed: _interval > 5
-                                    ? () => _onChangeInterval(_interval -= 5)
+                                onPressed: _waterReminder.interval > 5
+                                    ? () => _onChangeInterval(
+                                          _waterReminder.interval - 5,
+                                        )
                                     : null,
                               ),
                               RichText(
                                 text: TextSpan(children: [
                                   TextSpan(
-                                    text: _interval.toString(),
+                                    text: _waterReminder.interval.toString(),
                                     style: textTheme.displaySmall,
                                   ),
                                   TextSpan(
@@ -221,8 +219,9 @@ class _WaterReminderEditWidgetState extends State<WaterReminderEditWidget> {
                                 color: context.colors.primary,
                                 splashRadius: 21,
                                 iconSize: 24,
-                                onPressed: _interval < 120
-                                    ? () => _onChangeInterval(_interval += 5)
+                                onPressed: _waterReminder.interval < 120
+                                    ? () => _onChangeInterval(
+                                        _waterReminder.interval + 5)
                                     : null,
                               ),
                             ],
@@ -230,7 +229,7 @@ class _WaterReminderEditWidgetState extends State<WaterReminderEditWidget> {
                           Slider(
                             min: 5,
                             max: 120,
-                            value: _interval.toDouble(),
+                            value: _waterReminder.interval.toDouble(),
                             onChanged: (value) =>
                                 _onChangeInterval(value.toInt()),
                             divisions: 23,
@@ -250,7 +249,7 @@ class _WaterReminderEditWidgetState extends State<WaterReminderEditWidget> {
                             border: OutlineInputBorder(),
                             helperText: '',
                           ),
-                          initialValue: _amount.toString(),
+                          initialValue: _waterReminder.amount.toString(),
                           keyboardType: TextInputType.number,
                           inputFormatters: [
                             FilteringTextInputFormatter.digitsOnly
@@ -267,7 +266,9 @@ class _WaterReminderEditWidgetState extends State<WaterReminderEditWidget> {
                           onSaved: (newValue) {
                             if (newValue != null && newValue.isNotEmpty) {
                               setState(() {
-                                _amount = int.parse(newValue);
+                                _waterReminder = _waterReminder.copyWith(
+                                  amount: int.parse(newValue),
+                                );
                               });
                             }
                           },
@@ -300,13 +301,7 @@ class _WaterReminderEditWidgetState extends State<WaterReminderEditWidget> {
     if (_formKey.currentState?.validate() ?? false) {
       _formKey.currentState!.save();
       await _editWaterReminderStore
-          .run(
-        amount: _amount,
-        interval: _interval,
-        start: _start,
-        end: _end,
-        update: widget.toUpdate,
-      )
+          .run(waterReminder: _waterReminder, update: widget.toUpdate)
           .then(
         (_) {
           final navigator = Navigator.of(context);
@@ -339,19 +334,44 @@ class _WaterReminderEditWidgetState extends State<WaterReminderEditWidget> {
         children: [
           _buildFormEdit(maxWidth),
           _buildTimelineReview(),
-          Center(
-            child: Observer(
-              builder: (_) {
-                return Visibility(
-                  visible: _editWaterReminderStore.loading,
-                  replacement: ElevatedButton(
-                    onPressed: _submit,
-                    child: const Text('Salvar'),
+          Observer(
+            builder: (_) {
+              return Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Row(
+                    children: [
+                      Switch(
+                        value: _waterReminder.active,
+                        onChanged: (bool value) {
+                          setState(() {
+                            _waterReminder = _waterReminder.copyWith(
+                              active: value,
+                            );
+                          });
+                        },
+                      ),
+                      const SizedBox(width: 3),
+                      Text(
+                        'Ativo',
+                        style: Theme.of(context)
+                            .textTheme
+                            .bodyMedium!
+                            .copyWith(color: context.colors.grey),
+                      ),
+                    ],
                   ),
-                  child: const CircularProgressIndicator(),
-                );
-              },
-            ),
+                  Visibility(
+                    visible: _editWaterReminderStore.loading,
+                    replacement: ElevatedButton(
+                      onPressed: _submit,
+                      child: const Text('Salvar'),
+                    ),
+                    child: const CircularProgressIndicator(),
+                  ),
+                ],
+              );
+            },
           )
         ].separator(const SizedBox(height: 21)).toList(),
       ),

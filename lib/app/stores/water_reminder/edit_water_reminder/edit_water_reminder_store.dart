@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:mobx/mobx.dart';
 
 import '../../../exceptions/base_exception.dart';
@@ -31,24 +30,16 @@ abstract class EditWaterReminderStoreBase with Store {
 
   @action
   Future<void> run({
-    required int amount,
-    required int interval,
-    required TimeOfDay start,
-    required TimeOfDay end,
+    required WaterReminder waterReminder,
     required bool update,
   }) async {
     try {
-      final data = WaterReminder(
-        amount: amount,
-        interval: interval,
-        start: start,
-        end: end,
-      );
-
       errorMessage = null;
 
-      _future = ObservableFuture(_service.createOrUpdate(data, update: update));
-      waterReminder = await _future;
+      _future = ObservableFuture(
+        _service.createOrUpdate(waterReminder, update: update),
+      );
+      this.waterReminder = await _future;
     } on IBaseException catch (e) {
       errorMessage = e.message;
     }

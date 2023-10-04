@@ -69,17 +69,9 @@ mixin _$EditWaterReminderStore on EditWaterReminderStoreBase, Store {
 
   @override
   Future<void> run(
-      {required int amount,
-      required int interval,
-      required TimeOfDay start,
-      required TimeOfDay end,
-      required bool update}) {
-    return _$runAsyncAction.run(() => super.run(
-        amount: amount,
-        interval: interval,
-        start: start,
-        end: end,
-        update: update));
+      {required WaterReminder waterReminder, required bool update}) {
+    return _$runAsyncAction
+        .run(() => super.run(waterReminder: waterReminder, update: update));
   }
 
   @override

@@ -57,40 +57,50 @@ class _ContainerReminderState extends State<ContainerReminder>
   @override
   Widget build(BuildContext context) {
     return Container(
+      clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(6),
         border: Border.all(color: context.colors.lightGrey),
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              TabBar(
-                controller: _tabController,
-                isScrollable: true,
-                physics: const NeverScrollableScrollPhysics(),
-                labelColor: context.colors.primaryDark,
-                indicator: BoxDecoration(
-                  borderRadius: BorderRadius.circular(6),
-                  color: context.colors.primaryLight,
+          Container(
+            decoration: BoxDecoration(
+              border: Border(
+                left: BorderSide(
+                  color: context.colors.primary.withOpacity(.9),
+                  width: 3,
                 ),
-                indicatorSize: TabBarIndicatorSize.tab,
-                indicatorPadding: EdgeInsets.zero,
-                padding: const EdgeInsets.all(6),
-                labelPadding: const EdgeInsets.symmetric(
-                  vertical: 9,
-                  horizontal: 18,
-                ),
-                tabs: [
-                  Text(widget.pageName),
-                  const Text('Histórico'),
-                ],
               ),
-              widget.action,
-            ],
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                TabBar(
+                  controller: _tabController,
+                  isScrollable: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  labelColor: context.colors.primary,
+                  indicator: BoxDecoration(
+                    borderRadius: BorderRadius.circular(6),
+                    color: context.colors.primaryLight,
+                  ),
+                  indicatorSize: TabBarIndicatorSize.tab,
+                  indicatorPadding: EdgeInsets.zero,
+                  padding: const EdgeInsets.all(6),
+                  labelPadding: const EdgeInsets.symmetric(
+                    vertical: 6,
+                    horizontal: 12,
+                  ),
+                  tabs: [
+                    Text(widget.pageName),
+                    const Text('Histórico'),
+                  ],
+                ),
+                widget.action,
+              ],
+            ),
           ),
           const Divider(),
           Padding(

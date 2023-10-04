@@ -18,9 +18,6 @@ extension TimeOfDayExtension on TimeOfDay {
   String get toHHMM =>
       '${hour.toString().padLeft(2, '0')}:${minute.toString().padLeft(2, '0')}';
 
-  String get toHHMMSS =>
-      '${hour.toString().padLeft(2, '0')}:${minute.toString().padLeft(2, '0')}:00';
-
   int get toInt {
     final hours = hour.clamp(0, 23);
     final minutes = minute.clamp(0, 59);
