@@ -55,7 +55,7 @@ class _MedicalReminderEditWidgetState extends State<MedicalReminderEditWidget> {
     super.initState();
 
     _medicalReminder = ValueNotifier(
-      widget.medicalReminder?.copyWith() ?? MedicalReminder.empty(),
+      widget.medicalReminder ?? MedicalReminder.empty(),
     );
     _medicalReminder.addListener(
       () => widget.onEdit?.call(_medicalReminder.value),

@@ -168,7 +168,7 @@ class _HomePageState extends State<HomePage>
                                         ),
                                       ),
                                     ],
-                                    alignmentOffset: const Offset(-124, 0),
+                                    alignmentOffset: const Offset(-171, 0),
                                     builder:
                                         (context, controller, Widget? child) {
                                       return Material(

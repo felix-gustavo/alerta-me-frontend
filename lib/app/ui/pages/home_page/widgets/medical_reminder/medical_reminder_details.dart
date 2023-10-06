@@ -251,8 +251,6 @@ class _MedicalReminderDetailsState extends State<MedicalReminderDetails> {
 
   @override
   Widget build(BuildContext context) {
-    print('widget.medicalReminder.id: ${widget.medicalReminder.id}');
-
     return LayoutBuilder(
       builder: (context, constraints) {
         const iconSize = 45.0;
