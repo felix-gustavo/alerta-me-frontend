@@ -39,7 +39,5 @@ class AuthServiceImpl implements IAuthService {
   }
 
   @override
-  Future<void> signOut() async {
-    await _loginProvider?.signOut();
-  }
+  Future<void> signOut() async => _auth.signOut();
 }

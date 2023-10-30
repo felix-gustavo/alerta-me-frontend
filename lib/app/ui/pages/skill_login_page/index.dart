@@ -6,17 +6,13 @@ import '../../../services/auth/providers/login_provider.dart';
 import '../../../shared/extensions/colors_app_extension.dart';
 import '../../../stores/auth/auth_store.dart';
 
-class LoginPage extends StatelessWidget {
-  const LoginPage({super.key});
+class SkillLoginPage extends StatelessWidget {
+  const SkillLoginPage({super.key});
 
   @override
   Widget build(BuildContext context) {
     final authStore = Provider.of<AuthStore>(context, listen: false);
     final textTheme = Theme.of(context).textTheme;
-
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      await authStore.initAuthUser();
-    });
 
     return Scaffold(
       body: Center(
@@ -43,14 +39,14 @@ class LoginPage extends StatelessWidget {
                   ),
                   const SizedBox(height: 42),
                   Text(
-                    'Bem-vindo(a) ao AlertaMe!',
+                    'Bem-vindo(a) ao AlertaMe Skill!',
                     textAlign: TextAlign.center,
                     style: textTheme.bodyLarge!
                         .copyWith(color: context.colors.grey),
                   ),
                   const SizedBox(height: 6),
                   Text(
-                    'Por favor, faça login como cuidador para acessar as funcionalidades do gerenciamento de lembretes',
+                    'Por favor, faça login como idoso para se comunicar por voz',
                     textAlign: TextAlign.center,
                     style: textTheme.bodyLarge!
                         .copyWith(color: context.colors.grey),
@@ -85,16 +81,9 @@ class LoginPage extends StatelessWidget {
                   const Spacer(),
                   ElevatedButton(
                     onPressed: () async {
-                      await authStore.signIn(LoginProviders.google);
+                      await authStore.signIn(LoginProviders.skill);
                     },
-                    child: const Text('Login com Google'),
-                  ),
-                  const Spacer(),
-                  ElevatedButton(
-                    onPressed: () async {
-                      await authStore.signIn(LoginProviders.anon);
-                    },
-                    child: const Text('Usuário Demo'),
+                    child: const Text('Usuário Idoso Demo 2'),
                   ),
                 ],
               );

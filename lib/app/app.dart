@@ -120,12 +120,6 @@ class App extends StatelessWidget {
         ),
       ],
       builder: (context, child) {
-        final authStore = Provider.of<AuthStore>(context);
-
-        WidgetsBinding.instance.addPostFrameCallback((_) async {
-          await authStore.initAuthUser();
-        });
-
         return Observer(
           builder: (context) => MaterialApp.router(
             title: 'Flutter Demo',

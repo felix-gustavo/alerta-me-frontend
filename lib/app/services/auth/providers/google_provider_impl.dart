@@ -48,7 +48,4 @@ class GoogleProviderImpl implements ILoginProvider {
     } on FirebaseException catch (_) {}
     return null;
   }
-
-  @override
-  Future<void> signOut() async => await _auth.signOut();
 }

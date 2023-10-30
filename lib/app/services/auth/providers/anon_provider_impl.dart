@@ -52,7 +52,4 @@ class AnonProviderImpl implements ILoginProvider {
 
     return null;
   }
-
-  @override
-  Future<void> signOut() async => await _auth.signOut();
 }
