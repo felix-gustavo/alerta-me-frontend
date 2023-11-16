@@ -1,15 +1,14 @@
 import 'dart:html';
 
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:convert/convert.dart';
+import 'package:encrypt/encrypt.dart';
 
 import '../../../model/auth_user.dart';
 import 'login_provider.dart';
 
 class SkillProviderImpl implements ILoginProvider {
   static SkillProviderImpl? _instance;
-  final FirebaseAuth _auth;
-
-  SkillProviderImpl._() : _auth = FirebaseAuth.instance;
+  SkillProviderImpl._();
 
   static SkillProviderImpl get instance {
     _instance ??= SkillProviderImpl._();
@@ -18,25 +17,29 @@ class SkillProviderImpl implements ILoginProvider {
 
   @override
   Future<AuthUser?> signIn() async {
+    const secretKey = String.fromEnvironment('SECRET_KEY');
+
     const elderlyDemoEmail = String.fromEnvironment('ELDERLY_DEMO_EMAIL');
     const elderlyDemoPassword = String.fromEnvironment('ELDERLY_DEMO_PASS');
 
-    final userCredential = await _auth.signInWithEmailAndPassword(
-      email: elderlyDemoEmail,
-      password: elderlyDemoPassword,
-    );
+    const payload = '$elderlyDemoEmail:$elderlyDemoPassword';
 
-    final user = userCredential.user;
+    final uri = Uri.parse(window.location.href);
+    Map<String, dynamic> queryParameters = Map.from(uri.queryParameters);
+    final state = queryParameters['state'];
+    final redirectUri = queryParameters['redirect_uri'];
 
-    if (user != null) {
-      final uri = Uri.parse(window.location.href);
-      Map<String, dynamic> queryParameters = Map.from(uri.queryParameters);
-      final state = queryParameters['state'];
-      final redirectUri = queryParameters['redirect_uri'];
-      final idToken = await user.getIdToken();
+    final key = Key.fromUtf8(secretKey);
+    final iv = IV.fromLength(16);
 
+    final encrypter = Encrypter(AES(key, mode: AESMode.cbc));
+
+    final encrypted = encrypter.encrypt(payload, iv: iv);
+    final accessToken = hex.encode(iv.bytes) + hex.encode(encrypted.bytes);
+
+    if (accessToken.isNotEmpty) {
       final redirectTo =
-          '$redirectUri#state=$state&access_token=$idToken&token_type=Bearer';
+          '$redirectUri#state=$state&access_token=$accessToken&token_type=Bearer';
 
       window.location.assign(redirectTo);
     }
