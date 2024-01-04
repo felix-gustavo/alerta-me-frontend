@@ -9,7 +9,7 @@ import '../../../../../shared/extensions/app_styles_extension.dart';
 import '../../../../../shared/extensions/colors_app_extension.dart';
 import '../../../../../shared/extensions/iterable_extension.dart';
 import '../../../../../shared/extensions/time_of_day_extension.dart';
-import '../../../../../stores/authorization/load_autorization/load_authorization_store.dart';
+import '../../../../../stores/authorization/autorization/authorization_store.dart';
 import '../../../../../stores/water_reminder/load_water_reminder/load_water_reminder_store.dart';
 import '../../../../common_components/container_reminder.dart';
 import '../../../../common_components/my_dialog.dart';
@@ -26,13 +26,13 @@ class WaterReminderWidget extends StatefulWidget {
 
 class _WaterReminderWidgetState extends State<WaterReminderWidget>
     with SingleTickerProviderStateMixin {
-  late final LoadAuthorizationStore _loadAuthorizationStore;
+  late final AuthorizationStore _authorizationStore;
   late final LoadWaterReminderStore _loadWaterReminderStore;
 
   @override
   void initState() {
     super.initState();
-    _loadAuthorizationStore = Provider.of<LoadAuthorizationStore>(
+    _authorizationStore = Provider.of<AuthorizationStore>(
       context,
       listen: false,
     );
@@ -236,9 +236,8 @@ class _WaterReminderWidgetState extends State<WaterReminderWidget>
   }
 
   Widget _buildConfigWaterReminderButton() {
-    final authorizationApproved =
-        _loadAuthorizationStore.authorization?.status ==
-            AuthorizationStatus.aprovado;
+    final authorizationApproved = _authorizationStore.authorization?.status ==
+        AuthorizationStatus.aprovado;
 
     return IconButton(
       onPressed: authorizationApproved

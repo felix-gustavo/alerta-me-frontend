@@ -100,6 +100,28 @@ mixin _$LoadMedicalReminderStore on LoadMedicalReminderStoreBase, Store {
   }
 
   @override
+  dynamic setMedicalReminders(List<MedicalReminder> medicalReminders) {
+    final _$actionInfo = _$LoadMedicalReminderStoreBaseActionController
+        .startAction(name: 'LoadMedicalReminderStoreBase.setMedicalReminders');
+    try {
+      return super.setMedicalReminders(medicalReminders);
+    } finally {
+      _$LoadMedicalReminderStoreBaseActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
+  void clear() {
+    final _$actionInfo = _$LoadMedicalReminderStoreBaseActionController
+        .startAction(name: 'LoadMedicalReminderStoreBase.clear');
+    try {
+      return super.clear();
+    } finally {
+      _$LoadMedicalReminderStoreBaseActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
   String toString() {
     return '''
 medicalReminders: ${medicalReminders},

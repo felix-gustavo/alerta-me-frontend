@@ -84,6 +84,7 @@ class HttpClientDioImpl implements IHttpClient {
   Future<HttpResponseDto> delete(
     String url, {
     String? token,
+    dynamic data,
   }) async {
     try {
       Options? options;
@@ -94,6 +95,7 @@ class HttpClientDioImpl implements IHttpClient {
       final response = await _dio.delete(
         url,
         options: options,
+        data: data,
       );
 
       return HttpResponseDto(

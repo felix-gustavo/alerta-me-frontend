@@ -7,7 +7,7 @@ import '../../../../../model/authorizations.dart';
 import '../../../../../model/medication_reminder.dart';
 import '../../../../../shared/extensions/colors_app_extension.dart';
 import '../../../../../shared/extensions/iterable_extension.dart';
-import '../../../../../stores/authorization/load_autorization/load_authorization_store.dart';
+import '../../../../../stores/authorization/autorization/authorization_store.dart';
 import '../../../../../stores/medication_reminder/load_medication_reminder/load_medication_reminder_store.dart';
 import '../../../../common_components/container_reminder.dart';
 import '../../../../common_components/my_dialog.dart';
@@ -24,7 +24,7 @@ class MedicationReminderWidget extends StatefulWidget {
 }
 
 class _MedicationReminderWidgetState extends State<MedicationReminderWidget> {
-  late final LoadAuthorizationStore _loadAuthorizationStore;
+  late final AuthorizationStore _authorizationStore;
   late final LoadMedicationReminderStore _loadMedicationReminderStore;
   late final ScrollController _remindersScollController = ScrollController();
 
@@ -34,7 +34,7 @@ class _MedicationReminderWidgetState extends State<MedicationReminderWidget> {
   void initState() {
     super.initState();
 
-    _loadAuthorizationStore = Provider.of<LoadAuthorizationStore>(
+    _authorizationStore = Provider.of<AuthorizationStore>(
       context,
       listen: false,
     );
@@ -122,9 +122,8 @@ class _MedicationReminderWidgetState extends State<MedicationReminderWidget> {
   }
 
   Widget _buildAddMedicationReminderButton() {
-    final authorizationApproved =
-        _loadAuthorizationStore.authorization?.status ==
-            AuthorizationStatus.aprovado;
+    final authorizationApproved = _authorizationStore.authorization?.status ==
+        AuthorizationStatus.aprovado;
 
     return IconButton(
       onPressed: authorizationApproved

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
+import 'package:mobx/mobx.dart';
 import 'package:provider/provider.dart';
 
 import '../../../shared/extensions/app_styles_extension.dart';
@@ -8,7 +9,7 @@ import '../../../shared/extensions/colors_app_extension.dart';
 import '../../../shared/extensions/datetime_extension.dart';
 import '../../../shared/extensions/iterable_extension.dart';
 import '../../../stores/auth/auth_store.dart';
-import '../../../stores/authorization/load_autorization/load_authorization_store.dart';
+import '../../../stores/authorization/autorization/authorization_store.dart';
 import '../../../stores/medical_reminder/load_medical_reminder/load_medical_reminder_store.dart';
 import '../../../stores/medication_reminder/load_medication_reminder/load_medication_reminder_store.dart';
 import '../../../stores/water_reminder/load_water_reminder/load_water_reminder_store.dart';
@@ -26,20 +27,20 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage>
     with SingleTickerProviderStateMixin {
-  late LoadAuthorizationStore _loadAuthorizationStore;
+  late AuthorizationStore _authorizationStore;
   late LoadWaterReminderStore _loadWaterReminderStore;
   late LoadMedicalReminderStore _loadMedicalReminderStore;
   late LoadMedicationReminderStore _loadMedicationReminderStore;
 
   late AuthStore _authStore;
 
-  late TabController _waterTabController;
-  late PageController _waterPageController;
+  late ReactionDisposer _loadStoresDisposer;
+  late ReactionDisposer _clearStoresDisposer;
 
   @override
   void initState() {
     super.initState();
-    _loadAuthorizationStore = Provider.of<LoadAuthorizationStore>(
+    _authorizationStore = Provider.of<AuthorizationStore>(
       context,
       listen: false,
     );
@@ -61,36 +62,41 @@ class _HomePageState extends State<HomePage>
 
     _authStore = Provider.of<AuthStore>(context, listen: false);
 
-    _waterTabController = TabController(length: 2, vsync: this);
-    _waterPageController = PageController();
+    Future<void> loadStores() async {
+      print('loadStores');
 
-    _waterTabController.addListener(() {
-      if (_waterTabController.index != _waterPageController.page?.toInt()) {
-        _waterPageController.animateToPage(_waterTabController.index,
-            duration: const Duration(milliseconds: 100), curve: Curves.ease);
-      }
-    });
-
-    _waterPageController.addListener(() {
-      if (_waterTabController.index != _waterPageController.page?.toInt()) {
-        _waterTabController.animateTo(_waterPageController.page?.toInt() ?? 0,
-            duration: const Duration(milliseconds: 100));
-      }
-    });
-
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
       await Future.wait([
-        _loadAuthorizationStore.run(),
+        _authorizationStore.run(),
         _loadWaterReminderStore.run(),
         _loadMedicalReminderStore.run(),
         _loadMedicationReminderStore.run()
       ]);
-    });
+    }
+
+    void clearStores() {
+      print('clearStores');
+
+      _authorizationStore.clear();
+      _loadWaterReminderStore.clear();
+      _loadMedicalReminderStore.clear();
+      _loadMedicationReminderStore.clear();
+    }
+
+    _loadStoresDisposer = when(
+      (_) => _authStore.isAuthenticated.value,
+      loadStores,
+    );
+
+    _clearStoresDisposer = when(
+      (_) => !_authStore.isAuthenticated.value,
+      clearStores,
+    );
   }
 
   @override
   void dispose() {
-    _waterTabController.dispose();
+    _loadStoresDisposer();
+    _clearStoresDisposer();
     super.dispose();
   }
 

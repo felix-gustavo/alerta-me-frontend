@@ -8,7 +8,7 @@ import '../../../../../model/medical_reminder.dart';
 import '../../../../../shared/extensions/app_styles_extension.dart';
 import '../../../../../shared/extensions/colors_app_extension.dart';
 import '../../../../../shared/extensions/iterable_extension.dart';
-import '../../../../../stores/authorization/load_autorization/load_authorization_store.dart';
+import '../../../../../stores/authorization/autorization/authorization_store.dart';
 import '../../../../../stores/medical_reminder/load_medical_reminder/load_medical_reminder_store.dart';
 import '../../../../common_components/container_reminder.dart';
 import '../../../../common_components/labeled_checkbox.dart';
@@ -25,7 +25,7 @@ class MedicalReminderWidget extends StatefulWidget {
 }
 
 class _MedicalReminderWidgetState extends State<MedicalReminderWidget> {
-  late final LoadAuthorizationStore _loadAuthorizationStore;
+  late final AuthorizationStore _authorizationStore;
   late final LoadMedicalReminderStore _loadMedicalReminderStore;
 
   late final ScrollController _remindersScollController = ScrollController();
@@ -36,7 +36,7 @@ class _MedicalReminderWidgetState extends State<MedicalReminderWidget> {
   void initState() {
     super.initState();
 
-    _loadAuthorizationStore = Provider.of<LoadAuthorizationStore>(
+    _authorizationStore = Provider.of<AuthorizationStore>(
       context,
       listen: false,
     );
@@ -122,9 +122,8 @@ class _MedicalReminderWidgetState extends State<MedicalReminderWidget> {
   }
 
   Widget _buildAddMedicalReminderButton() {
-    final authorizationApproved =
-        _loadAuthorizationStore.authorization?.status ==
-            AuthorizationStatus.aprovado;
+    final authorizationApproved = _authorizationStore.authorization?.status ==
+        AuthorizationStatus.aprovado;
 
     return IconButton(
       onPressed: authorizationApproved

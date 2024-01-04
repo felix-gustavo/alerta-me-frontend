@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'load_authorization_store.dart';
+part of 'authorization_store.dart';
 
 // **************************************************************************
 // StoreGenerator
@@ -8,7 +8,7 @@ part of 'load_authorization_store.dart';
 
 // ignore_for_file: non_constant_identifier_names, unnecessary_brace_in_string_interps, unnecessary_lambdas, prefer_expression_function_bodies, lines_longer_than_80_chars, avoid_as, avoid_annotating_with_dynamic, no_leading_underscores_for_local_identifiers
 
-mixin _$LoadAuthorizationStore on AuthorizationStoreBase, Store {
+mixin _$AuthorizationStore on AuthorizationStoreBase, Store {
   Computed<bool>? _$loadingComputed;
 
   @override
@@ -32,20 +32,19 @@ mixin _$LoadAuthorizationStore on AuthorizationStoreBase, Store {
     });
   }
 
-  late final _$_authorizationFutureAtom = Atom(
-      name: 'AuthorizationStoreBase._authorizationFuture', context: context);
+  late final _$_futureAtom =
+      Atom(name: 'AuthorizationStoreBase._future', context: context);
 
   @override
-  ObservableFuture<Authorizations?> get _authorizationFuture {
-    _$_authorizationFutureAtom.reportRead();
-    return super._authorizationFuture;
+  ObservableFuture<Authorizations?> get _future {
+    _$_futureAtom.reportRead();
+    return super._future;
   }
 
   @override
-  set _authorizationFuture(ObservableFuture<Authorizations?> value) {
-    _$_authorizationFutureAtom.reportWrite(value, super._authorizationFuture,
-        () {
-      super._authorizationFuture = value;
+  set _future(ObservableFuture<Authorizations?> value) {
+    _$_futureAtom.reportWrite(value, super._future, () {
+      super._future = value;
     });
   }
 
@@ -77,11 +76,22 @@ mixin _$LoadAuthorizationStore on AuthorizationStoreBase, Store {
       ActionController(name: 'AuthorizationStoreBase', context: context);
 
   @override
-  void setAuthorization(Authorizations authorization) {
+  void setAuthorization(Authorizations? authorization) {
     final _$actionInfo = _$AuthorizationStoreBaseActionController.startAction(
         name: 'AuthorizationStoreBase.setAuthorization');
     try {
       return super.setAuthorization(authorization);
+    } finally {
+      _$AuthorizationStoreBaseActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
+  void clear() {
+    final _$actionInfo = _$AuthorizationStoreBaseActionController.startAction(
+        name: 'AuthorizationStoreBase.clear');
+    try {
+      return super.clear();
     } finally {
       _$AuthorizationStoreBaseActionController.endAction(_$actionInfo);
     }

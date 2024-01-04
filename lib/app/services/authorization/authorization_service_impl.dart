@@ -1,23 +1,18 @@
-import 'package:firebase_auth/firebase_auth.dart';
-
-import '../../exceptions/exceptions_impl.dart';
 import '../../model/authorizations.dart';
 import '../http/http_client.dart';
 import 'authorization_service.dart';
 
 class AuthorizationServiceImpl implements IAuthorizationService {
   final IHttpClient _httpClient;
-  final FirebaseAuth _auth;
 
   AuthorizationServiceImpl({required IHttpClient httpClient})
-      : _httpClient = httpClient,
-        _auth = FirebaseAuth.instance;
+      : _httpClient = httpClient;
 
   @override
-  Future<Authorizations> createAuthorization(String email) async {
-    final accessToken = await _auth.currentUser?.getIdToken();
-    if (accessToken == null) throw SessionExpiredException();
-
+  Future<Authorizations> createAuthorization({
+    required String email,
+    required String accessToken,
+  }) async {
     final response = await _httpClient.post(
       '/authorizations',
       data: {'elderly': email},
@@ -28,10 +23,7 @@ class AuthorizationServiceImpl implements IAuthorizationService {
   }
 
   @override
-  Future<Authorizations?> getAuthorization() async {
-    final accessToken = await _auth.currentUser?.getIdToken();
-    if (accessToken == null) throw SessionExpiredException();
-
+  Future<Authorizations?> getAuthorization(String accessToken) async {
     final response = await _httpClient.get(
       '/authorizations/user',
       token: accessToken,
@@ -39,5 +31,16 @@ class AuthorizationServiceImpl implements IAuthorizationService {
 
     if (response.data == null) return null;
     return Authorizations.fromMap(response.data);
+  }
+
+  @override
+  Future<String?> deleteAuthorization(String accessToken) async {
+    final response = await _httpClient.delete(
+      '/authorizations',
+      token: accessToken,
+    );
+
+    if (response.statusCode == 200) return response.data['id'];
+    return null;
   }
 }

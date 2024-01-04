@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:mobx/mobx.dart';
 
 import '../../exceptions/base_exception.dart';
-import '../../exceptions/exceptions_impl.dart';
+import '../../model/auth_user.dart';
 import '../../model/users.dart';
 import '../../services/auth/auth_service.dart';
 import '../../services/auth/providers/login_provider.dart';
@@ -18,13 +18,17 @@ abstract class AuthStoreBase with Store {
       : _authService = authService;
 
   @observable
-  Users? user;
+  AuthUser? authUser;
+
+  @computed
+  Users? get user => authUser?.user;
 
   @observable
   String? error;
 
   @computed
-  ValueNotifier<bool> get isAuthenticated => ValueNotifier<bool>(user != null);
+  ValueNotifier<bool> get isAuthenticated =>
+      ValueNotifier<bool>(authUser != null);
 
   @observable
   bool loading = false;
@@ -33,14 +37,9 @@ abstract class AuthStoreBase with Store {
   Future<void> signIn(LoginProviders loginProvider) async {
     loading = true;
     try {
-      final authUser = await _authService.signIn(
-        loginProvider.implementation(),
-      );
-      user = authUser?.user;
+      authUser = await _authService.signIn(loginProvider.implementation());
     } on IBaseException catch (error) {
       this.error = error.message;
-    } on SessionExpiredException catch (_) {
-      await signOut();
     } finally {
       loading = false;
     }
@@ -50,11 +49,9 @@ abstract class AuthStoreBase with Store {
   Future<void> initAuthUser() async {
     loading = true;
     try {
-      user = await _authService.getAuthUser();
-    } on IBaseException catch (error) {
-      this.error = error.message;
-    } on SessionExpiredException catch (_) {
-      await signOut();
+      authUser = await _authService.getAuthUser();
+    } on IBaseException catch (_) {
+      if (authUser != null) authUser = null;
     } finally {
       loading = false;
     }
@@ -63,8 +60,8 @@ abstract class AuthStoreBase with Store {
   @action
   Future<void> signOut() async {
     loading = true;
-    if (user != null) await _authService.signOut();
-    user = null;
+    if (authUser != null) await _authService.signOut();
+    authUser = null;
     error = null;
     loading = false;
   }

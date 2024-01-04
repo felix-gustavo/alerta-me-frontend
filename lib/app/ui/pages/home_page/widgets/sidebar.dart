@@ -7,7 +7,7 @@ import 'package:skeletons/skeletons.dart';
 import '/app/stores/auth/auth_store.dart';
 import '../../../../shared/extensions/app_styles_extension.dart';
 import '../../../../shared/extensions/colors_app_extension.dart';
-import '../../../../stores/authorization/load_autorization/load_authorization_store.dart';
+import '../../../../stores/authorization/autorization/authorization_store.dart';
 import '../../../common_components/confirm_dialog.dart';
 import '../../../common_components/my_dialog.dart';
 import '../../settings_page/index.dart';
@@ -122,7 +122,7 @@ class SidebarWiget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final loadAuthorizationStore = Provider.of<LoadAuthorizationStore>(
+    final authorizationStore = Provider.of<AuthorizationStore>(
       context,
       listen: false,
     );
@@ -134,7 +134,7 @@ class SidebarWiget extends StatelessWidget {
       padding: EdgeInsets.all(context.isMobile ? 3 : 12),
       child: Observer(
         builder: (_) {
-          final elderly = loadAuthorizationStore.authorization?.elderly;
+          final elderly = authorizationStore.authorization?.elderly;
 
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -182,7 +182,7 @@ class SidebarWiget extends StatelessWidget {
                             style: textTheme.titleMedium!
                                 .copyWith(color: context.colors.grey),
                           ),
-                          ...loadAuthorizationStore.loading
+                          ...authorizationStore.loading
                               ? _getSkeletons()
                               : [
                                   IntrinsicWidth(

@@ -2,7 +2,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 import '../../exceptions/exceptions_impl.dart';
 import '../../model/auth_user.dart';
-import '../../model/users.dart';
 import '../users/users_service.dart';
 import 'auth_service.dart';
 import 'providers/login_provider.dart';
@@ -12,24 +11,23 @@ class AuthServiceImpl implements IAuthService {
   final FirebaseAuth _auth;
   final IUsersService _usersService;
 
-  AuthServiceImpl(IUsersService usersService)
+  AuthServiceImpl({required IUsersService usersService})
       : _auth = FirebaseAuth.instance,
         _usersService = usersService;
 
   @override
-  Future<Users> getAuthUser() async {
+  Future<AuthUser> getAuthUser() async {
     final currentUser = _auth.currentUser;
-    final email = currentUser?.email;
-    final token = await currentUser?.getIdToken();
+    final accessToken = await currentUser?.getIdToken();
 
-    print('token: $token');
+    print('token: $accessToken');
 
-    if (email == null || token == null) throw SessionExpiredException();
+    if (accessToken == null) throw SessionExpiredException();
 
-    final user = await _usersService.getUserByEmail(email: email, token: token);
+    final user = await _usersService.getUserByToken(accessToken);
     if (user == null) throw SessionExpiredException();
 
-    return user;
+    return AuthUser(user: user, accessToken: accessToken);
   }
 
   @override

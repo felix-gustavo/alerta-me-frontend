@@ -51,13 +51,15 @@ class NotFoundException implements IBaseException {
   String get message => _message;
 }
 
-class SessionExpiredException {
+class SessionExpiredException implements IBaseException {
   final String _message;
   SessionExpiredException({String? message})
       : _message = message ?? 'Sessão expirada';
 
+  @override
   int get statusCode => 440;
 
+  @override
   String get message => _message;
 }
 

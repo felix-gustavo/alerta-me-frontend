@@ -6,16 +6,15 @@ import '../../../model/authorizations.dart';
 import '../../../services/authorization/authorization_service.dart';
 import '../../auth/auth_store.dart';
 
-part 'create_autorization_store.g.dart';
+part 'authorization_store.g.dart';
 
-class CreateAuthorizationStore = CreateAuthorizationStoreBase
-    with _$CreateAuthorizationStore;
+class AuthorizationStore = AuthorizationStoreBase with _$AuthorizationStore;
 
-abstract class CreateAuthorizationStoreBase with Store {
+abstract class AuthorizationStoreBase with Store {
   late final IAuthorizationService _service;
   late final AuthStore _authStore;
 
-  CreateAuthorizationStoreBase({
+  AuthorizationStoreBase({
     required IAuthorizationService authorizationService,
     required AuthStore authStore,
   })  : _service = authorizationService,
@@ -25,27 +24,40 @@ abstract class CreateAuthorizationStoreBase with Store {
   Authorizations? authorization;
 
   @observable
+  ObservableFuture<Authorizations?> _future = ObservableFuture.value(null);
+
+  @observable
   String? errorMessage;
 
   @computed
   bool get loading => _future.status == FutureStatus.pending;
 
-  @observable
-  ObservableFuture<Authorizations?> _future = ObservableFuture.value(null);
-
   @action
-  Future<void> run({required String email}) async {
+  Future<void> run() async {
     try {
       errorMessage = null;
 
       final accessToken = _authStore.authUser?.accessToken;
       if (accessToken == null) throw SessionExpiredException();
 
-      _future = ObservableFuture(
-          _service.createAuthorization(email: email, accessToken: accessToken));
+      _future = ObservableFuture(_service.getAuthorization(accessToken));
       authorization = await _future;
     } on IBaseException catch (e) {
       errorMessage = e.message;
     }
+  }
+
+  @action
+  void setAuthorization(Authorizations? authorization) {
+    if (this.authorization?.id != authorization?.id) {
+      this.authorization = authorization;
+    }
+  }
+
+  @action
+  void clear() {
+    errorMessage = null;
+    _future = ObservableFuture.value(null);
+    authorization = null;
   }
 }

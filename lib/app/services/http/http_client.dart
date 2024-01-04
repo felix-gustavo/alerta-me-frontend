@@ -15,6 +15,7 @@ abstract class IHttpClient {
 
   Future<HttpResponseDto> delete(
     String url, {
+    dynamic data,
     String? token,
   });
 

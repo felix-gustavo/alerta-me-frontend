@@ -41,7 +41,14 @@ abstract class LoadWaterReminderStoreBase with Store {
   }
 
   @action
-  void setWaterReminder(WaterReminder waterReminder) {
-    this.waterReminder = waterReminder;
+  void setWaterReminder(WaterReminder? waterReminder) {
+    if (this.waterReminder != waterReminder) this.waterReminder = waterReminder;
+  }
+
+  @action
+  void clear() {
+    errorMessage = null;
+    _future = ObservableFuture.value(null);
+    waterReminder = null;
   }
 }

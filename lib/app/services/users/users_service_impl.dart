@@ -9,15 +9,13 @@ class UsersServiceImpl implements IUsersService {
       : _httpClient = httpClient;
 
   @override
-  Future<Users?> getUserByEmail({
-    required String email,
-    required String token,
-  }) async {
+  Future<Users?> getUserByToken(String accessToken) async {
     Users? user;
 
     final response = await _httpClient.get(
-      '/users/email/$email',
-      token: token,
+      '/users',
+      token: accessToken,
+      queryParameters: {'isElderly': false},
     );
     if (response.data != null) user = Users.fromMap(response.data);
 
@@ -25,16 +23,42 @@ class UsersServiceImpl implements IUsersService {
   }
 
   @override
-  Future<bool> isElderly({
+  Future<Users?> getUserByEmail({
     required String email,
-    required String token,
+    required String accessToken,
   }) async {
+    Users? user;
+
     final response = await _httpClient.get(
-      '/users/is-elderly/$email',
-      token: token,
+      '/users/email/$email',
+      token: accessToken,
+      queryParameters: {'isElderly': false},
+    );
+    if (response.data != null) user = Users.fromMap(response.data);
+
+    return user;
+  }
+
+  @override
+  Future<String?> deleteUser({required String accessToken}) async {
+    final response = await _httpClient.delete('/users', token: accessToken);
+
+    if (response.statusCode == 200) return response.data['id'];
+    return null;
+  }
+
+  @override
+  Future<String?> deleteElderly({
+    required String id,
+    required String accessToken,
+  }) async {
+    final response = await _httpClient.delete(
+      '/users/elderly',
+      token: accessToken,
+      data: {'id': id},
     );
 
-    if (response.data == null) return false;
-    return response.data;
+    if (response.statusCode == 200) return response.data['id'];
+    return null;
   }
 }

@@ -6,7 +6,7 @@ import 'package:skeletons/skeletons.dart';
 import '../../../../model/users.dart';
 import '../../../../shared/extensions/colors_app_extension.dart';
 import '../../../../shared/extensions/iterable_extension.dart';
-import '../../../../stores/authorization/load_autorization/load_authorization_store.dart';
+import '../../../../stores/authorization/autorization/authorization_store.dart';
 
 class ElderlyCardWidget extends StatelessWidget {
   const ElderlyCardWidget({Key? key}) : super(key: key);
@@ -83,7 +83,7 @@ class ElderlyCardWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final loadAuthorizationStore = Provider.of<LoadAuthorizationStore>(
+    final authorizationStore = Provider.of<AuthorizationStore>(
       context,
       listen: false,
     );
@@ -98,9 +98,9 @@ class ElderlyCardWidget extends StatelessWidget {
         constraints: const BoxConstraints(maxWidth: 345),
         child: Observer(
           builder: (_) {
-            final elderly = loadAuthorizationStore.authorization?.elderly;
+            final elderly = authorizationStore.authorization?.elderly;
 
-            return loadAuthorizationStore.loading
+            return authorizationStore.loading
                 ? _buildLoadingCard()
                 : elderly == null
                     ? _buildEmptyCard(context)

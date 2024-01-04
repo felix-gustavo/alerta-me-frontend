@@ -11,12 +11,7 @@ class LoginPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final authStore = Provider.of<AuthStore>(context, listen: false);
     final textTheme = Theme.of(context).textTheme;
-
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      await authStore.initAuthUser();
-    });
 
     return Scaffold(
       body: Center(
@@ -31,7 +26,9 @@ class LoginPage extends StatelessWidget {
           width: 601,
           height: 462,
           child: Observer(
-            builder: (context) {
+            builder: (_) {
+              final authStore = Provider.of<AuthStore>(context, listen: false);
+
               return Column(
                 children: [
                   Text(

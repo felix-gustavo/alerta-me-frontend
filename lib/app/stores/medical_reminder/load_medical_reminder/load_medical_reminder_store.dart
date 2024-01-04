@@ -59,4 +59,18 @@ abstract class LoadMedicalReminderStoreBase with Store {
 
     medicalReminders = [...copy];
   }
+
+  @action
+  setMedicalReminders(List<MedicalReminder> medicalReminders) {
+    if (this.medicalReminders != medicalReminders) {
+      this.medicalReminders = medicalReminders;
+    }
+  }
+
+  @action
+  void clear() {
+    errorMessage = null;
+    _future = ObservableFuture.value([]);
+    medicalReminders = [];
+  }
 }

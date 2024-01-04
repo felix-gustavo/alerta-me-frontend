@@ -22,6 +22,7 @@ class MyOutlinedButton extends StatelessWidget {
       ),
       child: Text(
         text,
+        textAlign: TextAlign.center,
         style: color != null
             ? Theme.of(context).textTheme.bodyMedium!.copyWith(color: color)
             : null,

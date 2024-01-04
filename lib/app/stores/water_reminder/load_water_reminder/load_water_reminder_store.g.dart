@@ -76,11 +76,22 @@ mixin _$LoadWaterReminderStore on LoadWaterReminderStoreBase, Store {
       ActionController(name: 'LoadWaterReminderStoreBase', context: context);
 
   @override
-  void setWaterReminder(WaterReminder waterReminder) {
+  void setWaterReminder(WaterReminder? waterReminder) {
     final _$actionInfo = _$LoadWaterReminderStoreBaseActionController
         .startAction(name: 'LoadWaterReminderStoreBase.setWaterReminder');
     try {
       return super.setWaterReminder(waterReminder);
+    } finally {
+      _$LoadWaterReminderStoreBaseActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
+  void clear() {
+    final _$actionInfo = _$LoadWaterReminderStoreBaseActionController
+        .startAction(name: 'LoadWaterReminderStoreBase.clear');
+    try {
+      return super.clear();
     } finally {
       _$LoadWaterReminderStoreBaseActionController.endAction(_$actionInfo);
     }

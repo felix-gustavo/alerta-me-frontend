@@ -60,4 +60,18 @@ abstract class LoadMedicationReminderStoreBase with Store {
 
     medicationReminders = [...copy];
   }
+
+  @action
+  setMedicationReminders(List<MedicationReminder> medicationReminders) {
+    if (this.medicationReminders != medicationReminders) {
+      this.medicationReminders = medicationReminders;
+    }
+  }
+
+  @action
+  void clear() {
+    errorMessage = null;
+    _future = ObservableFuture.value([]);
+    medicationReminders = [];
+  }
 }
