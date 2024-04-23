@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
+import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:mobx/mobx.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../shared/extensions/colors_app_extension.dart';
 import '../../../../shared/extensions/iterable_extension.dart';
 import '../../../../stores/auth/auth_store.dart';
+import '../../../../stores/medical_reminder/load_medical_reminder/load_medical_reminder_store.dart';
+import '../../../../stores/medication_reminder/load_medication_reminder/load_medication_reminder_store.dart';
 import '../../../../stores/user/delete_user/delete_user_store.dart';
-import '../../../buttons/my_outlined_button.dart';
+import '../../../../stores/water_reminder/load_water_reminder/load_water_reminder_store.dart';
 import '../../../common_components/my_dialog.dart';
 import '../../../common_components/unordered_list_item.dart';
 
@@ -23,6 +26,10 @@ class _AccountWidgetState extends State<AccountWidget> {
   late final AuthStore _authStore;
   late final ReactionDisposer _disposer;
 
+  late final LoadWaterReminderStore _loadWaterReminderStore;
+  late final LoadMedicalReminderStore _loadMedicalReminderStore;
+  late final LoadMedicationReminderStore _loadMedicationReminderStore;
+
   @override
   void initState() {
     super.initState();
@@ -32,14 +39,33 @@ class _AccountWidgetState extends State<AccountWidget> {
       listen: false,
     );
 
+    _loadWaterReminderStore = Provider.of<LoadWaterReminderStore>(
+      context,
+      listen: false,
+    );
+    _loadMedicalReminderStore = Provider.of<LoadMedicalReminderStore>(
+      context,
+      listen: false,
+    );
+    _loadMedicationReminderStore = Provider.of<LoadMedicationReminderStore>(
+      context,
+      listen: false,
+    );
+
     _authStore = Provider.of<AuthStore>(context, listen: false);
 
     _disposer = when(
-        (_) =>
-            _deleteUserStore.userId != null &&
-            _authStore.authUser?.user.id == _deleteUserStore.userId, () async {
-      await _authStore.signOut();
-    });
+      (_) => _deleteUserStore.userId != null,
+      () {
+        print(
+            '_deleteUserStore.userId != null && _authStore.authUser?.user.id == _deleteUserStore.userId');
+        _loadWaterReminderStore.clear();
+        _loadMedicalReminderStore.clear();
+        _loadMedicationReminderStore.clear();
+        _deleteUserStore.clear();
+        _authStore.signOut();
+      },
+    );
   }
 
   @override
@@ -83,14 +109,14 @@ class _AccountWidgetState extends State<AccountWidget> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  MyOutlinedButton(
+                  TextButton(
                     onPressed: () => Navigator.of(context).pop(),
-                    text: 'Não',
+                    child: const Text('Não'),
                   ),
                   const SizedBox(width: 6),
                   _deleteUserStore.loading
                       ? const CircularProgressIndicator()
-                      : MyOutlinedButton(
+                      : ElevatedButton(
                           onPressed: () async {
                             Navigator.of(context).pop();
                             await _deleteUserStore.run();
@@ -99,7 +125,7 @@ class _AccountWidgetState extends State<AccountWidget> {
                                   _deleteUserStore.errorMessage!);
                             }
                           },
-                          text: 'Sim',
+                          child: const Text('Sim'),
                         ),
                 ],
               )
@@ -112,7 +138,6 @@ class _AccountWidgetState extends State<AccountWidget> {
 
   @override
   Widget build(BuildContext context) {
-    final authStore = Provider.of<AuthStore>(context);
     final textTheme = Theme.of(context).textTheme;
 
     return Container(
@@ -133,21 +158,30 @@ class _AccountWidgetState extends State<AccountWidget> {
           const Divider(),
           Padding(
             padding: const EdgeInsets.all(12),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                _buildField('Nome: ', authStore.user?.name ?? ''),
-                _buildField('Email: ', authStore.user?.email ?? ''),
-                const SizedBox(height: 12),
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: MyOutlinedButton(
-                    onPressed: _deleteAccount,
-                    text: 'EXCLUIR CONTA',
-                    color: context.colors.error,
-                  ),
-                ),
-              ].separator(const SizedBox(height: 12)).toList(),
+            child: Observer(
+              builder: (context) {
+                final userMin = Provider.of<AuthStore>(context).userMin;
+
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    _buildField('Nome: ', userMin?.name ?? ''),
+                    _buildField('Email: ', userMin?.email ?? ''),
+                    const SizedBox(height: 12),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: OutlinedButton(
+                        onPressed: _deleteAccount,
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: context.colors.error,
+                          side: BorderSide(color: context.colors.error),
+                        ),
+                        child: const Text('EXCLUIR CONTA'),
+                      ),
+                    ),
+                  ].separator(const SizedBox(height: 12)).toList(),
+                );
+              },
             ),
           ),
         ],

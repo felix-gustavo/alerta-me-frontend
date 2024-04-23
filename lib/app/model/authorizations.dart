@@ -1,15 +1,13 @@
-import 'users.dart';
-
 enum AuthorizationStatus {
   aprovado,
   aguardando,
-  negado,
+  negado;
 }
 
 class Authorizations {
   final String id;
-  final Users elderly;
-  final Users user;
+  final String elderly;
+  final String user;
   final AuthorizationStatus status;
 
   Authorizations({
@@ -21,23 +19,19 @@ class Authorizations {
 
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
-      'id': elderly.id,
-      'elderly': elderly.toMap(),
-      'user': user.toMap(),
+      'id': id,
+      'elderly': elderly,
+      'user': user,
       'status': status.name,
     };
   }
 
   factory Authorizations.fromMap(Map<String, dynamic> map) {
-    final statusString = map['status'] as String;
-    final status =
-        AuthorizationStatus.values.firstWhere((e) => e.name == statusString);
-
     return Authorizations(
       id: map['id'] as String,
-      elderly: Users.fromMap(map['elderly'] as Map<String, dynamic>),
-      user: Users.fromMap(map['user'] as Map<String, dynamic>),
-      status: status,
+      elderly: map['elderly'] as String,
+      user: map['user'] as String,
+      status: AuthorizationStatus.values.byName(map['status'] as String),
     );
   }
 }

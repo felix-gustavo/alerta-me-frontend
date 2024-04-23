@@ -28,4 +28,6 @@ extension DateTimeExtension on DateTime {
         hour,
         minute,
       );
+
+  TimeOfDay get toTimeOfDay => TimeOfDay(hour: hour, minute: minute);
 }

@@ -36,9 +36,11 @@ class ConfirmDialog extends StatelessWidget {
 
     return AlertDialog(
       title: Text(title, style: textTheme.titleMedium),
-      titlePadding: const EdgeInsets.all(12),
-      contentPadding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
-      actionsPadding: const EdgeInsets.fromLTRB(12, 18, 12, 12),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      titlePadding: const EdgeInsets.all(21),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 21),
+      actionsPadding: const EdgeInsets.fromLTRB(21, 33, 15, 21),
+      buttonPadding: const EdgeInsets.symmetric(horizontal: 12),
       content: content != null && content!.isNotEmpty
           ? Text(
               content!,
@@ -56,7 +58,7 @@ class ConfirmDialog extends StatelessWidget {
           },
           child: Text(negativeBtnText),
         ),
-        TextButton(
+        ElevatedButton(
           onPressed: onPostivePressed,
           child: Text(positiveBtnText),
         ),

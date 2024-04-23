@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
-import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:skeletons/skeletons.dart';
 
@@ -8,6 +7,7 @@ import '/app/stores/auth/auth_store.dart';
 import '../../../../shared/extensions/app_styles_extension.dart';
 import '../../../../shared/extensions/colors_app_extension.dart';
 import '../../../../stores/authorization/autorization/authorization_store.dart';
+import '../../../../stores/elderly/load_elderly/load_elderly_store.dart';
 import '../../../common_components/confirm_dialog.dart';
 import '../../../common_components/my_dialog.dart';
 import '../../settings_page/index.dart';
@@ -22,17 +22,8 @@ class SidebarWiget extends StatelessWidget {
         title: 'Sair',
         content: 'Deseja realmente sair do sistema?',
         positiveBtnText: 'SIM',
-        onPostivePressed: () async {
-          final authStore = Provider.of<AuthStore>(
-            context,
-            listen: false,
-          );
-          await authStore.signOut();
-
-          if (authStore.error == null && context.mounted) {
-            context.go('/login');
-          }
-        },
+        onPostivePressed: () async =>
+            await Provider.of<AuthStore>(context, listen: false).signOut(),
         negativeBtnText: 'NÃO',
       ),
     );
@@ -126,6 +117,10 @@ class SidebarWiget extends StatelessWidget {
       context,
       listen: false,
     );
+    final loadElderlyStore = Provider.of<LoadElderlyStore>(
+      context,
+      listen: false,
+    );
 
     final textTheme = Theme.of(context).textTheme;
 
@@ -134,7 +129,7 @@ class SidebarWiget extends StatelessWidget {
       padding: EdgeInsets.all(context.isMobile ? 3 : 12),
       child: Observer(
         builder: (_) {
-          final elderly = authorizationStore.authorization?.elderly;
+          final elderly = loadElderlyStore.elderly;
 
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,

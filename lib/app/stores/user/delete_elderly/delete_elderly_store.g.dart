@@ -72,6 +72,20 @@ mixin _$DeleteElderlyStore on DeleteElderlyStoreBase, Store {
     return _$runAsyncAction.run(() => super.run(id: id));
   }
 
+  late final _$DeleteElderlyStoreBaseActionController =
+      ActionController(name: 'DeleteElderlyStoreBase', context: context);
+
+  @override
+  void clear() {
+    final _$actionInfo = _$DeleteElderlyStoreBaseActionController.startAction(
+        name: 'DeleteElderlyStoreBase.clear');
+    try {
+      return super.clear();
+    } finally {
+      _$DeleteElderlyStoreBaseActionController.endAction(_$actionInfo);
+    }
+  }
+
   @override
   String toString() {
     return '''

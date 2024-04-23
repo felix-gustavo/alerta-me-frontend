@@ -1,6 +1,9 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 
 import '../shared/extensions/int_extension.dart';
+import '../shared/extensions/string_extension.dart';
 import '../shared/extensions/time_of_day_extension.dart';
 
 class WaterReminder {
@@ -9,6 +12,7 @@ class WaterReminder {
   final int interval;
   final int amount;
   final bool active;
+  final List<TimeOfDay>? reminders;
 
   WaterReminder({
     required this.start,
@@ -16,15 +20,17 @@ class WaterReminder {
     required this.interval,
     required this.amount,
     required this.active,
+    this.reminders,
   });
 
   factory WaterReminder.empty() {
     return WaterReminder(
       start: const TimeOfDay(hour: 8, minute: 0),
       end: const TimeOfDay(hour: 12, minute: 0),
-      interval: 60,
+      interval: 30,
       amount: 3000,
       active: true,
+      reminders: [],
     );
   }
 
@@ -35,12 +41,14 @@ class WaterReminder {
       'interval': interval,
       'amount': amount,
       'active': active,
+      'reminders': reminders?.map((e) => e.toHHMM).toList()
     };
   }
 
   factory WaterReminder.fromMap(Map<String, dynamic> map) {
     final start = map['start'] as int;
     final end = map['end'] as int;
+    final remindersList = List<String>.from(map['reminders'] as List);
 
     return WaterReminder(
       start: start.intHHMMToTimeOfDay,
@@ -48,6 +56,7 @@ class WaterReminder {
       interval: map['interval'] as int,
       amount: map['amount'] as int,
       active: map['active'] as bool,
+      reminders: remindersList.map((e) => e.hhmmToTime).toList(),
     );
   }
 
@@ -57,6 +66,7 @@ class WaterReminder {
     int? interval,
     int? amount,
     bool? active,
+    List<TimeOfDay>? reminders,
   }) {
     return WaterReminder(
       start: start ?? this.start,
@@ -64,6 +74,12 @@ class WaterReminder {
       interval: interval ?? this.interval,
       amount: amount ?? this.amount,
       active: active ?? this.active,
+      reminders: reminders ?? this.reminders,
     );
   }
+
+  String toJson() => json.encode(toMap());
+
+  factory WaterReminder.fromJson(String source) =>
+      WaterReminder.fromMap(json.decode(source) as Map<String, dynamic>);
 }

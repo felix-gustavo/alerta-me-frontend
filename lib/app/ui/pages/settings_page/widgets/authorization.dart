@@ -11,8 +11,11 @@ import '../../../../shared/extensions/iterable_extension.dart';
 import '../../../../stores/authorization/autorization/authorization_store.dart';
 import '../../../../stores/authorization/create_autorization/create_autorization_store.dart';
 import '../../../../stores/authorization/delete_autorization/delete_authorization_store.dart';
+import '../../../../stores/elderly/load_elderly/load_elderly_store.dart';
+import '../../../../stores/medical_reminder/load_medical_reminder/load_medical_reminder_store.dart';
+import '../../../../stores/medication_reminder/load_medication_reminder/load_medication_reminder_store.dart';
 import '../../../../stores/user/delete_elderly/delete_elderly_store.dart';
-import '../../../buttons/my_outlined_button.dart';
+import '../../../../stores/water_reminder/load_water_reminder/load_water_reminder_store.dart';
 import '../../../common_components/confirm_dialog.dart';
 import '../../../common_components/my_dialog.dart';
 import '../../../common_components/unordered_list_item.dart';
@@ -29,9 +32,14 @@ class _AuthorizarionWidgetState extends State<AuthorizarionWidget> {
   String email = '';
   late final GlobalKey<FormState> _formKey;
   late final CreateAuthorizationStore _createAuthorizationStore;
+  late final LoadElderlyStore _loadElderlyStore;
   late final AuthorizationStore _authorizationStore;
   late final DeleteAuthorizationStore _deleteAuthorizationStore;
   late final DeleteElderlyStore _deleteElderlyStore;
+
+  late final LoadWaterReminderStore _loadWaterReminderStore;
+  late final LoadMedicalReminderStore _loadMedicalReminderStore;
+  late final LoadMedicationReminderStore _loadMedicationReminderStore;
 
   late final List<ReactionDisposer?> _disposers;
 
@@ -41,6 +49,12 @@ class _AuthorizarionWidgetState extends State<AuthorizarionWidget> {
   void initState() {
     super.initState();
     _formKey = GlobalKey<FormState>();
+
+    _loadElderlyStore = Provider.of<LoadElderlyStore>(
+      context,
+      listen: false,
+    );
+
     _createAuthorizationStore = Provider.of<CreateAuthorizationStore>(
       context,
       listen: false,
@@ -61,32 +75,66 @@ class _AuthorizarionWidgetState extends State<AuthorizarionWidget> {
       listen: false,
     );
 
+    _loadWaterReminderStore = Provider.of<LoadWaterReminderStore>(
+      context,
+      listen: false,
+    );
+    _loadMedicalReminderStore = Provider.of<LoadMedicalReminderStore>(
+      context,
+      listen: false,
+    );
+    _loadMedicationReminderStore = Provider.of<LoadMedicationReminderStore>(
+      context,
+      listen: false,
+    );
+
     _disposers = [
       when(
         (_) =>
             _createAuthorizationStore.authorization != null &&
             _authorizationStore.authorization?.id !=
                 _createAuthorizationStore.authorization?.id,
-        () => _authorizationStore
-            .setAuthorization(_createAuthorizationStore.authorization),
+        () async {
+          print('authorization é diferente de createAuthorization');
+          _authorizationStore.setAuthorization(
+            _createAuthorizationStore.authorization,
+          );
+          await _loadElderlyStore.run();
+        },
       ),
       when(
         (_) {
-          final authorization = _authorizationStore.authorization;
-          return authorization != null &&
-              _deleteAuthorizationStore.authorizationId == authorization.id;
+          final authorizationId = _authorizationStore.authorization?.id;
+          final deleteAuthoriId = _deleteAuthorizationStore.authorizationId;
+          return deleteAuthoriId != null && deleteAuthoriId == authorizationId;
         },
-        () => _authorizationStore.setAuthorization(null),
+        () {
+          print('_authorizationStore == _deleteAuthorizationStore');
+          _clearStores();
+          _deleteAuthorizationStore.clear();
+        },
       ),
       when(
         (_) {
-          final authorization = _authorizationStore.authorization;
-          return authorization != null &&
-              _deleteElderlyStore.elderlyId == authorization.elderly.id;
+          final elderlyId = _authorizationStore.authorization?.elderly;
+          final deleteElderlyId = _deleteElderlyStore.elderlyId;
+          return deleteElderlyId != null && deleteElderlyId == elderlyId;
         },
-        () => _authorizationStore.setAuthorization(null),
+        () {
+          print('_authorizationStore == _deleteElderlyStore');
+          _clearStores();
+          _deleteElderlyStore.clear();
+        },
       ),
     ];
+  }
+
+  void _clearStores() {
+    _authorizationStore.clear();
+    _loadElderlyStore.clear();
+    _loadWaterReminderStore.clear();
+    _loadMedicalReminderStore.clear();
+    _loadMedicationReminderStore.clear();
   }
 
   @override
@@ -123,12 +171,12 @@ class _AuthorizarionWidgetState extends State<AuthorizarionWidget> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  MyOutlinedButton(
+                  TextButton(
                     onPressed: () => Navigator.of(context).pop(),
-                    text: 'Não',
+                    child: const Text('Não'),
                   ),
                   const SizedBox(width: 6),
-                  MyOutlinedButton(
+                  ElevatedButton(
                     onPressed: () async {
                       Navigator.of(context).pop();
                       await _deleteElderlyStore.run(id: elderlyId);
@@ -136,7 +184,7 @@ class _AuthorizarionWidgetState extends State<AuthorizarionWidget> {
                         EasyLoading.showInfo(_deleteElderlyStore.errorMessage!);
                       }
                     },
-                    text: 'Sim',
+                    child: const Text('Sim'),
                   ),
                 ],
               )
@@ -152,8 +200,9 @@ class _AuthorizarionWidgetState extends State<AuthorizarionWidget> {
       _formKey.currentState!.save();
 
       final authorization = _authorizationStore.authorization;
+      final elderly = _loadElderlyStore.elderly;
       if (authorization?.status == AuthorizationStatus.negado &&
-          email == authorization?.elderly.email) {
+          email == elderly?.email) {
         showDialog(
           context: context,
           builder: (context) => const MyDialog(
@@ -175,31 +224,30 @@ class _AuthorizarionWidgetState extends State<AuthorizarionWidget> {
           context: context,
           builder: (context) {
             return ConfirmDialog(
-                title: 'Confirmar pedido de autorização',
-                content: authorization?.status == AuthorizationStatus.negado
-                    ? 'Ao registrar um novo pedido, a solicitação para ${authorization?.elderly.email} será removida'
-                    : null,
-                positiveBtnText: 'Continuar',
-                negativeBtnText: 'Cancelar',
-                onPostivePressed: () async {
-                  Navigator.of(context).pop();
+              title: 'Confirmar pedido de autorização',
+              content: authorization?.status == AuthorizationStatus.negado
+                  ? 'Ao registrar um novo pedido, a solicitação para ${elderly?.email} será removida'
+                  : null,
+              positiveBtnText: 'Continuar',
+              negativeBtnText: 'Cancelar',
+              onPostivePressed: () async {
+                Navigator.of(context).pop();
 
-                  await _createAuthorizationStore.run(email: email);
-
-                  if (_createAuthorizationStore.errorMessage != null) {
+                await _createAuthorizationStore.run(email: email);
+                if (_createAuthorizationStore.errorMessage != null) {
+                  EasyLoading.showInfo(
+                    _createAuthorizationStore.errorMessage!,
+                  );
+                } else if (authorization != null) {
+                  await _deleteAuthorizationStore.run();
+                  if (_deleteAuthorizationStore.errorMessage != null) {
                     EasyLoading.showInfo(
-                      _createAuthorizationStore.errorMessage!,
+                      _deleteAuthorizationStore.errorMessage!,
                     );
                   }
-                  if (authorization != null) {
-                    await _deleteAuthorizationStore.run();
-                    if (_deleteAuthorizationStore.errorMessage != null) {
-                      EasyLoading.showInfo(
-                        _deleteAuthorizationStore.errorMessage!,
-                      );
-                    }
-                  }
-                });
+                }
+              },
+            );
           },
         );
       }
@@ -287,13 +335,12 @@ class _AuthorizarionWidgetState extends State<AuthorizarionWidget> {
       child: Observer(
         builder: (_) {
           final authorization = _authorizationStore.authorization;
-
           List<Widget> fields = [];
 
           if (authorization != null) {
-            final Users elderly = authorization.elderly;
-            fields.add(_buildField('Nome: ', elderly.name));
-            fields.add(_buildField('Email: ', elderly.email));
+            final Users? elderly = _loadElderlyStore.elderly;
+            fields.add(_buildField('Nome: ', elderly?.name ?? ''));
+            fields.add(_buildField('Email: ', elderly?.email ?? ''));
             fields.add(_buildField('Status: ', authorization.status.name));
             fields = fields.separator(const SizedBox(height: 12)).toList();
           }
@@ -314,10 +361,13 @@ class _AuthorizarionWidgetState extends State<AuthorizarionWidget> {
                       color: context.colors.grey,
                     ),
                   ),
-                  MyOutlinedButton(
-                    onPressed: () => _deleteElderly(authorization!.elderly.id),
-                    text: 'EXCLUIR CONTA',
-                    color: context.colors.error,
+                  OutlinedButton(
+                    onPressed: () => _deleteElderly(authorization!.elderly),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: context.colors.error,
+                      side: BorderSide(color: context.colors.error),
+                    ),
+                    child: const Text('EXCLUIR CONTA'),
                   ),
                 ],
               ),
@@ -335,12 +385,13 @@ class _AuthorizarionWidgetState extends State<AuthorizarionWidget> {
                   children: [
                     Text(
                       'Autorização',
-                      style:
-                          textTheme.titleMedium!.copyWith(color: Colors.black),
+                      style: textTheme.titleMedium!.copyWith(
+                        color: Colors.black,
+                      ),
                     ),
                     if (!(authorization == null ||
                         authorization.status == AuthorizationStatus.negado))
-                      MyOutlinedButton(
+                      OutlinedButton(
                         onPressed: () {
                           showDialog(
                             context: context,
@@ -365,7 +416,7 @@ class _AuthorizarionWidgetState extends State<AuthorizarionWidget> {
                             ),
                           );
                         },
-                        text: 'CANCELAR',
+                        child: const Text('CANCELAR'),
                       ),
                   ],
                 ),

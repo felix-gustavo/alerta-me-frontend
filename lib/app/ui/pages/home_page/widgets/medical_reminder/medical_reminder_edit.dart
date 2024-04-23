@@ -6,7 +6,6 @@ import 'package:form_validator/form_validator.dart';
 import 'package:mobx/mobx.dart';
 import 'package:provider/provider.dart';
 
-import '../../../../../exceptions/exceptions_impl.dart';
 import '../../../../../model/medical_reminder.dart';
 import '../../../../../shared/extensions/colors_app_extension.dart';
 import '../../../../../shared/extensions/datetime_extension.dart';
@@ -15,7 +14,6 @@ import '../../../../../shared/extensions/string_extension.dart';
 import '../../../../../shared/extensions/time_of_day_extension.dart';
 import '../../../../../stores/medical_reminder/edit_medical_reminder/edit_medical_reminder_store.dart';
 import '../../../../../stores/medical_reminder/load_medical_reminder/load_medical_reminder_store.dart';
-import '../../../../common_components/redirect_to_login.dart';
 
 class MedicalReminderEditWidget extends StatefulWidget {
   final MedicalReminder? medicalReminder;
@@ -110,23 +108,15 @@ class _MedicalReminderEditWidgetState extends State<MedicalReminderEditWidget> {
 
   Future<void> _submit() async {
     if (_formKey.currentState?.validate() ?? false) {
-      await _editMedicalReminderStore.run(data: _medicalReminder.value).then(
-        (_) {
-          final navigator = Navigator.of(context);
+      final navigator = Navigator.of(context);
+      await _editMedicalReminderStore.run(data: _medicalReminder.value);
 
-          final errorMessage = _editMedicalReminderStore.errorMessage;
-          errorMessage != null
-              ? EasyLoading.showError(errorMessage)
-              : EasyLoading.showSuccess('Configuração salva');
+      final errorMessage = _editMedicalReminderStore.errorMessage;
+      errorMessage != null
+          ? EasyLoading.showError(errorMessage)
+          : EasyLoading.showSuccess('Configuração salva');
 
-          navigator.pop();
-        },
-        onError: (error) async {
-          if (error is SessionExpiredException) {
-            await RedirectToLogin.show(context, error.message);
-          }
-        },
-      );
+      navigator.pop();
     }
   }
 

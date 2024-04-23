@@ -61,4 +61,9 @@ class MedicalReminder {
       address: map['address'] as String,
     );
   }
+
+  @override
+  String toString() {
+    return 'MedicalReminder(id: $id, medicName: $medicName, specialty: $specialty, dateTime: $dateTime, address: $address)';
+  }
 }

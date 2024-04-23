@@ -7,24 +7,24 @@ import '../../../../../shared/extensions/iterable_extension.dart';
 import '../../../../../shared/extensions/time_of_day_extension.dart';
 
 class MedicationReminderDoseSection extends StatefulWidget {
-  final MedicationReminder medicationReminder;
+  final String dosageUnit;
   final void Function({
     required bool isExpand,
     required Weekday weekday,
   }) onExpand;
-  final void Function({required Map<Weekday, List<Dosage>?> newDose})
+  final void Function({required Weekday weekday, List<Dosage>? dosage})
       onChangeDose;
   final Map<Weekday, List<Dosage>?> dose;
   final Map<Weekday, bool> activated;
 
-  MedicationReminderDoseSection({
+  const MedicationReminderDoseSection({
     Key? key,
-    required this.medicationReminder,
+    required this.dosageUnit,
+    required this.dose,
     required this.onExpand,
     required this.onChangeDose,
     required this.activated,
-  })  : dose = medicationReminder.dose,
-        super(key: key);
+  }) : super(key: key);
 
   @override
   State<MedicationReminderDoseSection> createState() =>
@@ -34,11 +34,49 @@ class MedicationReminderDoseSection extends StatefulWidget {
 class _MedicationReminderDoseSectionState
     extends State<MedicationReminderDoseSection> {
   late final Map<Weekday, ScrollController> _dosageScrollController;
+  late final Map<Weekday, List<TextEditingController>?> _textEC;
 
   @override
   void initState() {
-    final iterMap = Weekday.values.map((e) => MapEntry(e, ScrollController()));
-    _dosageScrollController = Map.fromEntries(iterMap);
+    _dosageScrollController = Map.fromEntries(
+      Weekday.values.map((e) => MapEntry(e, ScrollController())),
+    );
+    _textEC = Map.fromEntries(
+      Weekday.values.map(
+        (weekday) {
+          final List<TextEditingController> list = [];
+          for (int i = 0; i < (widget.dose[weekday]?.length ?? 0); i++) {
+            final e = widget.dose[weekday]![i];
+            final textEC = TextEditingController(text: e.amount.toString());
+
+            textEC.addListener(() {
+              final value = textEC.text;
+              if (value.isNotEmpty) {
+                final newValue = int.parse(value);
+                final dosage = widget.dose[weekday]![i];
+
+                if (dosage.amount != newValue) {
+                  final newDosage = Dosage(
+                    time: dosage.time,
+                    amount: newValue,
+                  );
+
+                  final copy = [...?(widget.dose[weekday])];
+
+                  copy.removeAt(i);
+                  copy.insert(i, newDosage);
+
+                  widget.onChangeDose(weekday: weekday, dosage: copy);
+                }
+              }
+            });
+
+            list.add(textEC);
+          }
+          return MapEntry(weekday, list);
+        },
+      ),
+    );
 
     super.initState();
   }
@@ -46,6 +84,13 @@ class _MedicationReminderDoseSectionState
   @override
   void dispose() {
     _dosageScrollController.forEach((_, value) => value.dispose());
+    _textEC.forEach((_, value) {
+      if (value != null) {
+        for (var i = 0; i < value.length; i++) {
+          value[i].dispose();
+        }
+      }
+    });
     super.dispose();
   }
 
@@ -55,21 +100,59 @@ class _MedicationReminderDoseSectionState
   );
 
   void _addDose(Weekday weekday) {
-    widget.onChangeDose(
-      newDose: {
-        ...widget.medicationReminder.dose,
-        ...{
-          weekday: [...widget.dose[weekday] ?? [], defaultDosage]
+    setState(() {
+      final textEC = TextEditingController(
+        text: defaultDosage.amount.toString(),
+      );
+
+      if (_textEC[weekday] != null) {
+        _textEC[weekday]!.add(textEC);
+      } else {
+        _textEC[weekday] = [textEC];
+      }
+
+      textEC.addListener(() {
+        final value = textEC.text;
+        if (value.isNotEmpty) {
+          final index = _textEC[weekday]!.length - 1;
+          final newValue = int.parse(value);
+          final dosage = widget.dose[weekday]![index];
+
+          if (dosage.amount != newValue) {
+            final newDosage = Dosage(
+              time: dosage.time,
+              amount: newValue,
+            );
+
+            final copy = [...?(widget.dose[weekday])];
+
+            copy.removeAt(index);
+            copy.insert(index, newDosage);
+
+            widget.onChangeDose(weekday: weekday, dosage: copy);
+          }
         }
-      },
+      });
+    });
+
+    widget.onChangeDose(
+      weekday: weekday,
+      dosage: [...widget.dose[weekday] ?? [], defaultDosage],
     );
   }
 
-  void _removeDose({required Dosage dosage, required Weekday weekday}) {
-    final copy = {...widget.dose};
-    copy[weekday]!.remove(dosage);
+  void _removeDose({
+    required Weekday weekday,
+    required int index,
+  }) {
+    final copy = [...?(widget.dose[weekday])];
+    copy.removeAt(index);
 
-    widget.onChangeDose(newDose: copy);
+    setState(() {
+      _textEC[weekday]!.removeAt(index);
+    });
+
+    widget.onChangeDose(weekday: weekday, dosage: copy);
   }
 
   Widget _buildDosageFields(
@@ -86,37 +169,46 @@ class _MedicationReminderDoseSectionState
         Card(
           margin: const EdgeInsets.only(top: 6, right: 6),
           elevation: 0,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(9),
+            side: BorderSide(color: context.colors.lightGrey),
+          ),
           child: SizedBox(
             width: 93,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 TextButton(
+                  style: TextButton.styleFrom(
+                    shape: const RoundedRectangleBorder(
+                      borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(9),
+                        topRight: Radius.circular(9),
+                      ),
+                    ),
+                  ),
                   onPressed: () async {
                     final newTime = await showTimePicker(
                       context: context,
                       initialTime: dosage.time,
                     );
 
-                    if (newTime != null) {
-                      final copy = {...widget.dose};
-
-                      copy[weekday]!.removeAt(index);
-                      copy[weekday]!.insert(
-                        index,
-                        Dosage(time: newTime, amount: dosage.amount),
+                    if (newTime != null &&
+                        newTime.compareTo(dosage.time) != 0) {
+                      final newDosage = Dosage(
+                        time: newTime,
+                        amount: dosage.amount,
                       );
+                      final copy = [...?(widget.dose[weekday])];
 
-                      widget.onChangeDose(newDose: copy);
+                      copy.removeAt(index);
+                      copy.insert(index, newDosage);
+
+                      widget.onChangeDose(weekday: weekday, dosage: copy);
                     }
                   },
                   child: Text(
-                    (widget.medicationReminder.dose[weekday]?.firstWhere(
-                              (element) => element == dosage,
-                            ) ??
-                            defaultDosage)
-                        .time
-                        .toHHMM,
+                    dosage.time.toHHMM,
                     style: textTheme.bodyMedium!.copyWith(
                       color: context.colors.primary,
                     ),
@@ -124,9 +216,25 @@ class _MedicationReminderDoseSectionState
                 ),
                 const Divider(),
                 TextFormField(
-                  controller: TextEditingController(
-                    text: dosage.amount.toString(),
-                  ),
+                  controller: _textEC[weekday]?[index],
+                  // onSaved: (value) {
+                  //   if (value != null && value.isNotEmpty) {
+                  //     final newValue = int.parse(value);
+                  //     if (dosage.amount != newValue) {
+                  //       final newDosage = Dosage(
+                  //         time: dosage.time,
+                  //         amount: newValue,
+                  //       );
+
+                  //       final copy = [...?(widget.dose[weekday])];
+
+                  //       copy.removeAt(index);
+                  //       copy.insert(index, newDosage);
+
+                  //       widget.onChangeDose(weekday: weekday, dosage: copy);
+                  //     }
+                  //   }
+                  // },
                   textAlign: TextAlign.center,
                   style: textTheme.bodyMedium!.copyWith(
                     color: context.colors.grey,
@@ -137,24 +245,12 @@ class _MedicationReminderDoseSectionState
                   ],
                   keyboardType: TextInputType.number,
                   validator: (value) {
-                    if (value?.isEmpty ?? true) return 'Informe valor';
-                    return null;
-                  },
-                  onChanged: (value) {
-                    if (value.isNotEmpty) {
-                      final copy = {...widget.dose};
-
-                      copy[weekday]!.removeAt(index);
-                      copy[weekday]!.insert(
-                        index,
-                        Dosage(
-                          time: dosage.time,
-                          amount: int.parse(value),
-                        ),
-                      );
-
-                      widget.onChangeDose(newDose: copy);
+                    if (value?.isEmpty ?? true) {
+                      return 'Informe valor';
+                    } else if (int.parse(value!) <= 0) {
+                      return 'Min > 0';
                     }
+                    return null;
                   },
                   decoration: const InputDecoration(
                     counter: null,
@@ -171,10 +267,7 @@ class _MedicationReminderDoseSectionState
           IconButton(
             padding: EdgeInsets.zero,
             constraints: const BoxConstraints(),
-            onPressed: () => _removeDose(
-              dosage: dosage,
-              weekday: weekday,
-            ),
+            onPressed: () => _removeDose(weekday: weekday, index: index),
             color: context.colors.error,
             icon: const Icon(Icons.remove_circle_rounded),
             iconSize: 21,
@@ -186,41 +279,69 @@ class _MedicationReminderDoseSectionState
 
   @override
   Widget build(BuildContext context) {
+    print('MedicationReminderDoseSection');
     final textTheme = Theme.of(context).textTheme;
 
     return Column(
       children: [
+        Align(
+          alignment: Alignment.centerLeft,
+          child: Row(
+            children: [
+              Text(
+                'Dados iniciais',
+                style: Theme.of(context)
+                    .textTheme
+                    .bodyMedium!
+                    .copyWith(color: context.colors.primary),
+              ),
+              Flexible(
+                child: Container(
+                  constraints: const BoxConstraints(maxWidth: 33),
+                  margin: const EdgeInsets.symmetric(horizontal: 6),
+                  width: double.infinity,
+                  height: 2,
+                  decoration: BoxDecoration(
+                    color: context.colors.primary,
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                ),
+              ),
+              Text(
+                'Dosagem',
+                style: Theme.of(context)
+                    .textTheme
+                    .bodyMedium!
+                    .copyWith(color: context.colors.primary),
+              ),
+            ].separator(const SizedBox(width: 3)).toList(),
+          ),
+        ),
+        const SizedBox(height: 12),
         ...Weekday.values.map(
           (weekday) {
-            final currentExpanded = widget.activated[weekday] ?? false;
+            final isExpanded = widget.activated[weekday] ?? false;
 
             return Card(
               clipBehavior: Clip.antiAlias,
               elevation: 0,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+                side: BorderSide(color: context.colors.lightGrey),
+              ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   InkWell(
                     onTap: () {
-                      if ((widget.dose[weekday]?.length ?? 0) == 0) {
-                        _addDose(weekday);
-                      }
+                      if (widget.dose[weekday] == null) _addDose(weekday);
 
                       widget.onExpand(
-                        isExpand: !currentExpanded,
+                        isExpand: !isExpanded,
                         weekday: weekday,
                       );
                     },
-                    child: Container(
-                      decoration: !currentExpanded
-                          ? null
-                          : BoxDecoration(
-                              border: Border(
-                                bottom: BorderSide(
-                                  color: context.colors.lightGrey,
-                                ),
-                              ),
-                            ),
+                    child: Padding(
                       padding: const EdgeInsets.all(9),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -228,16 +349,16 @@ class _MedicationReminderDoseSectionState
                           Text(
                             weekday.namePtBr,
                             style: textTheme.bodyMedium!.copyWith(
-                              color: currentExpanded
+                              color: isExpanded
                                   ? context.colors.primary
                                   : context.colors.grey.withOpacity(.54),
                             ),
                           ),
                           Icon(
-                            currentExpanded
+                            isExpanded
                                 ? Icons.check_box
                                 : Icons.check_box_outline_blank,
-                            color: currentExpanded
+                            color: isExpanded
                                 ? context.colors.primary
                                 : context.colors.lightGrey,
                             size: 18,
@@ -246,7 +367,7 @@ class _MedicationReminderDoseSectionState
                       ),
                     ),
                   ),
-                  if (currentExpanded)
+                  if (isExpanded)
                     Padding(
                       padding: const EdgeInsets.all(6),
                       child: Column(
@@ -255,7 +376,7 @@ class _MedicationReminderDoseSectionState
                           Padding(
                             padding: const EdgeInsets.all(6),
                             child: Text(
-                              'Defina horário e dosagem (${widget.medicationReminder.dosageUnit})',
+                              'Defina horário e dosagem (${widget.dosageUnit})',
                               style: textTheme.bodySmall,
                             ),
                           ),
@@ -273,17 +394,18 @@ class _MedicationReminderDoseSectionState
                                 scrollDirection: Axis.horizontal,
                                 child: Row(
                                   children: [
-                                    ...widget.dose[weekday]!
-                                        .asMap()
-                                        .entries
-                                        .map(
-                                          (entry) => _buildDosageFields(
-                                            context,
-                                            dosage: entry.value,
-                                            index: entry.key,
-                                            weekday: weekday,
-                                          ),
-                                        ),
+                                    ...widget.dose[weekday]
+                                            ?.asMap()
+                                            .entries
+                                            .map(
+                                              (entry) => _buildDosageFields(
+                                                context,
+                                                dosage: entry.value,
+                                                index: entry.key,
+                                                weekday: weekday,
+                                              ),
+                                            ) ??
+                                        [const SizedBox.shrink()],
                                     IconButton(
                                       onPressed: () => _addDose(weekday),
                                       icon: const Icon(Icons.add),

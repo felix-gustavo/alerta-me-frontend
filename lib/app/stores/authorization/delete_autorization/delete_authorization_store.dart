@@ -1,9 +1,9 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:mobx/mobx.dart';
 
 import '../../../exceptions/base_exception.dart';
 import '../../../exceptions/exceptions_impl.dart';
 import '../../../services/authorization/authorization_service.dart';
-import '../../auth/auth_store.dart';
 
 part 'delete_authorization_store.g.dart';
 
@@ -12,13 +12,12 @@ class DeleteAuthorizationStore = DeleteAuthorizationStoreBase
 
 abstract class DeleteAuthorizationStoreBase with Store {
   late final IAuthorizationService _service;
-  late final AuthStore _authStore;
+  late final FirebaseAuth _auth;
 
-  DeleteAuthorizationStoreBase({
-    required IAuthorizationService authorizationService,
-    required AuthStore authStore,
-  })  : _service = authorizationService,
-        _authStore = authStore;
+  DeleteAuthorizationStoreBase(
+      {required IAuthorizationService authorizationService})
+      : _service = authorizationService,
+        _auth = FirebaseAuth.instance;
 
   @observable
   String? authorizationId;
@@ -37,7 +36,7 @@ abstract class DeleteAuthorizationStoreBase with Store {
     try {
       errorMessage = null;
 
-      final accessToken = _authStore.authUser?.accessToken;
+      final accessToken = await _auth.currentUser?.getIdToken();
       if (accessToken == null) throw SessionExpiredException();
 
       _future = ObservableFuture(_service.deleteAuthorization(accessToken));
@@ -45,5 +44,12 @@ abstract class DeleteAuthorizationStoreBase with Store {
     } on IBaseException catch (e) {
       errorMessage = e.message;
     }
+  }
+
+  @action
+  void clear() {
+    errorMessage = null;
+    _future = ObservableFuture.value(null);
+    authorizationId = null;
   }
 }

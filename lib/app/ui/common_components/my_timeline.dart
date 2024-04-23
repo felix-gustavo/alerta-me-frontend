@@ -1,18 +1,21 @@
 import 'package:flutter/material.dart';
 
 import '../../shared/extensions/colors_app_extension.dart';
+import '../../shared/extensions/datetime_extension.dart';
 import '../../shared/extensions/time_of_day_extension.dart';
 
 class MyTimeline extends StatefulWidget {
   final TimeOfDay start;
   final TimeOfDay end;
   final int interval;
+  final void Function(List<TimeOfDay> reminders)? onGeneratedReminders;
 
   const MyTimeline({
     Key? key,
     required this.start,
     required this.end,
     required this.interval,
+    this.onGeneratedReminders,
   }) : super(key: key);
 
   @override
@@ -21,6 +24,15 @@ class MyTimeline extends StatefulWidget {
 
 class _MyTimelineState extends State<MyTimeline> {
   final ScrollController _timelineScollController = ScrollController();
+  // late final List<TimeOfDay> reminders = _generateReminders();
+
+  @override
+  void initState() {
+    super.initState();
+    // WidgetsBinding.instance.addPostFrameCallback((_) {
+    //   widget.onGeneratedReminders?.call(reminders);
+    // });
+  }
 
   @override
   void dispose() {
@@ -28,14 +40,31 @@ class _MyTimelineState extends State<MyTimeline> {
     super.dispose();
   }
 
-  Widget _buildConnector(
-    BuildContext context, {
-    required bool isPenultimate,
-    required double lessSpace,
-    required double spacing,
-  }) {
+  // List<TimeOfDay> _generateReminders({
+  //   required TimeOfDay start,
+  //   required TimeOfDay end,
+  //   required int interval,
+  // }) {
+  //   final List<TimeOfDay> reminders = [];
+
+  //   final startDate = DateTime(1998, 10, 29, start.hour, start.minute);
+  //   DateTime endDate = DateTime(1998, 10, 29, end.hour, end.minute);
+
+  //   DateTime temp = startDate;
+
+  //   while (temp.isBefore(endDate) || temp.isAtSameMomentAs(endDate)) {
+  //     reminders.add(
+  //       TimeOfDay(hour: temp.hour, minute: temp.minute),
+  //     );
+  //     temp = temp.add(Duration(minutes: interval));
+  //   }
+
+  //   return reminders;
+  // }
+
+  Widget _buildConnector({required double spacing}) {
     return Container(
-      width: isPenultimate ? lessSpace : spacing,
+      width: spacing,
       height: 2,
       color: context.colors.secondary,
     );
@@ -49,57 +78,66 @@ class _MyTimelineState extends State<MyTimeline> {
     );
   }
 
-  Widget _buildTimelineCardInfo(BuildContext context, {required String text}) {
+  Widget _buildTimelineCardInfo({
+    required String text,
+    required Color borderColor,
+    required Color textColor,
+  }) {
     return Container(
       decoration: BoxDecoration(
-        border: Border.all(color: context.colors.secondary),
+        border: Border.all(color: borderColor),
         borderRadius: const BorderRadius.all(Radius.circular(4)),
       ),
       padding: const EdgeInsets.all(6),
       child: Text(
         text,
-        style: Theme.of(context).textTheme.bodyLarge,
+        style:
+            Theme.of(context).textTheme.bodyLarge!.copyWith(color: textColor),
       ),
     );
   }
 
-  List<TimeOfDay> _generateReminders() {
-    final List<TimeOfDay> reminders = [];
+  List<TimeOfDay> _generateTimesReminders() {
+    final List<TimeOfDay> times = [];
 
-    final startDate =
-        DateTime(1998, 10, 29, widget.start.hour, widget.start.minute);
-    DateTime endDate =
-        DateTime(1998, 10, 29, widget.end.hour, widget.end.minute);
+    final start = widget.start;
+    final end = widget.end;
 
-    if (endDate.isBefore(startDate)) {
+    final startTime = TimeOfDay(hour: start.hour, minute: start.minute);
+    final endTime = TimeOfDay(hour: end.hour, minute: end.minute);
+
+    final now = DateTime.now();
+    final DateTime startDate = now.updateTime(startTime);
+    DateTime endDate = now.updateTime(endTime);
+
+    DateTime temp = startDate;
+
+    if (startTime.compareTo(endTime) == 1) {
       endDate = endDate.add(const Duration(days: 1));
     }
 
-    DateTime currentTime = startDate;
-
-    while (currentTime.isBefore(endDate) ||
-        currentTime.isAtSameMomentAs(endDate)) {
-      reminders.add(
-        TimeOfDay(hour: currentTime.hour, minute: currentTime.minute),
-      );
-      currentTime = currentTime.add(Duration(minutes: widget.interval));
+    while (temp.isBefore(endDate) || temp.isAtSameMomentAs(endDate)) {
+      times.add(temp.toTimeOfDay);
+      temp = temp.add(Duration(minutes: widget.interval));
     }
 
-    return reminders;
+    if (times.last.convertToMinutes != end.convertToMinutes) times.add(end);
+
+    widget.onGeneratedReminders?.call(times);
+    return times;
   }
 
   @override
   Widget build(BuildContext context) {
-    final reminders = _generateReminders();
-    if (reminders.last.convertToMinutes != widget.end.convertToMinutes) {
-      reminders.add(widget.end);
-    }
+    print('build timeline');
+    final reminders = _generateTimesReminders();
 
     final intervalPer24h = widget.start.interval(widget.end);
     final acc = (intervalPer24h.convertToMinutes / widget.interval) + 1;
 
     return Scrollbar(
       controller: _timelineScollController,
+      thumbVisibility: true,
       child: SingleChildScrollView(
         controller: _timelineScollController,
         scrollDirection: Axis.horizontal,
@@ -115,69 +153,56 @@ class _MyTimelineState extends State<MyTimeline> {
 
             const double spacing = 100;
             final percent = acc - acc.truncate();
-            final lessSpace = spacing * (percent != 0 ? percent : 1);
+            final lowSpace = spacing * (percent != 0 ? percent : 1);
+            final isPenultimateAndNotDivisible = isPenultimate && percent != 0;
 
-            const sizeIndicatorDot = 15.0;
+            const sizeIndicatorDot = 12.0;
 
             return Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
+                isPenultimateAndNotDivisible
+                    ? _buildTimelineCardInfoEmpty()
+                    : _buildTimelineCardInfo(
+                        text: value.toHHMM,
+                        borderColor: context.colors.secondary,
+                        textColor: context.colors.secondaryDark,
+                      ),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    isPenultimate && percent != 0
-                        ? _buildTimelineCardInfoEmpty()
-                        : _buildTimelineCardInfo(context, text: value.toHHMM),
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        isPenultimate && percent != 0
-                            ? Container(
-                                margin: const EdgeInsets.symmetric(vertical: 3),
-                                width: sizeIndicatorDot,
-                                height: sizeIndicatorDot,
-                                decoration: BoxDecoration(
-                                  border: Border.all(
-                                    color: context.colors.secondary,
-                                  ),
-                                  shape: BoxShape.circle,
-                                ),
-                              )
-                            : Container(
-                                margin: const EdgeInsets.symmetric(vertical: 3),
-                                width: sizeIndicatorDot,
-                                height: sizeIndicatorDot,
-                                decoration: BoxDecoration(
-                                  color: context.colors.secondary,
-                                  shape: BoxShape.circle,
-                                ),
-                              ),
-                        if (!isLast)
-                          _buildConnector(
-                            context,
-                            isPenultimate: isPenultimate,
-                            lessSpace: lessSpace < 36 ? 36 : lessSpace,
-                            spacing: spacing,
-                          ),
-                      ],
+                    Container(
+                      margin: const EdgeInsets.symmetric(vertical: 3),
+                      width: sizeIndicatorDot,
+                      height: sizeIndicatorDot,
+                      decoration: isPenultimateAndNotDivisible
+                          ? BoxDecoration(
+                              border: Border.all(color: context.colors.error),
+                              shape: BoxShape.circle,
+                            )
+                          : BoxDecoration(
+                              color: context.colors.secondary,
+                              shape: BoxShape.circle,
+                            ),
                     ),
+                    if (!isLast)
+                      _buildConnector(
+                        spacing: isPenultimate
+                            ? (lowSpace < 39 ? 39 : lowSpace)
+                            : spacing,
+                      ),
                   ],
                 ),
-                isPenultimate && percent != 0
-                    ? Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Tooltip(
-                            message:
-                                'O último intervalo entre os lembretes é menor,\npois é levado em consideração o horário de início e fim,\nbem como o intervalo entre os lembretes',
-                            child: _buildTimelineCardInfo(
-                              context,
-                              text: value.toHHMM,
-                            ),
-                          ),
-                        ],
+                isPenultimateAndNotDivisible
+                    ? Tooltip(
+                        message:
+                            'A diferença entre este lembrete e o último é menor que o intervalo especificado\nSinta-se livre pra ajustar o horário de início, fim, ou o intervalo entre os lembretes',
+                        child: _buildTimelineCardInfo(
+                          text: value.toHHMM,
+                          textColor: context.colors.error,
+                          borderColor: context.colors.error,
+                        ),
                       )
                     : _buildTimelineCardInfoEmpty(),
               ],

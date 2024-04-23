@@ -176,6 +176,10 @@ class _MedicalReminderDetailsState extends State<MedicalReminderDetails> {
     return Card(
       clipBehavior: Clip.antiAlias,
       elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(color: context.colors.lightGrey),
+      ),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 300),
         curve: Curves.easeIn,
@@ -264,18 +268,18 @@ class _MedicalReminderDetailsState extends State<MedicalReminderDetails> {
         return IntrinsicWidth(
           child: Column(
             children: [
-              Observer(
-                builder: (_) {
-                  return Stack(
-                    alignment: Alignment.topRight,
-                    children: [
-                      _buildPreviewCards(
-                        overflowed: overflowed,
-                        iconSize: iconSize,
-                        width: width,
-                      ),
-                      if (!_isExpanded)
-                        _deleteMedicalReminderStore.loading
+              Stack(
+                alignment: Alignment.topRight,
+                children: [
+                  _buildPreviewCards(
+                    overflowed: overflowed,
+                    iconSize: iconSize,
+                    width: width,
+                  ),
+                  if (!_isExpanded)
+                    Observer(
+                      builder: (_) {
+                        return _deleteMedicalReminderStore.loading
                             ? const Padding(
                                 padding: EdgeInsets.all(6),
                                 child: SizedBox.square(
@@ -291,10 +295,10 @@ class _MedicalReminderDetailsState extends State<MedicalReminderDetails> {
                                 ),
                                 splashRadius: 3,
                                 iconSize: 21,
-                              ),
-                    ],
-                  );
-                },
+                              );
+                      },
+                    ),
+                ],
               ),
               const SizedBox(height: 12),
               _buildEditSection(overflowed: overflowed, width: width),

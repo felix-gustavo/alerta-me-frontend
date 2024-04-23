@@ -17,9 +17,7 @@ class MyDialog extends StatelessWidget {
 
   Dialog _buildDialog(BuildContext context) {
     return Dialog(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(6),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: title != null
           ? Column(
               crossAxisAlignment: CrossAxisAlignment.start,

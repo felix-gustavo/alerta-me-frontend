@@ -7,6 +7,7 @@ import '../../../../model/users.dart';
 import '../../../../shared/extensions/colors_app_extension.dart';
 import '../../../../shared/extensions/iterable_extension.dart';
 import '../../../../stores/authorization/autorization/authorization_store.dart';
+import '../../../../stores/elderly/load_elderly/load_elderly_store.dart';
 
 class ElderlyCardWidget extends StatelessWidget {
   const ElderlyCardWidget({Key? key}) : super(key: key);
@@ -87,6 +88,10 @@ class ElderlyCardWidget extends StatelessWidget {
       context,
       listen: false,
     );
+    final loadElderlyStore = Provider.of<LoadElderlyStore>(
+      context,
+      listen: false,
+    );
 
     return Container(
       decoration: BoxDecoration(
@@ -104,7 +109,7 @@ class ElderlyCardWidget extends StatelessWidget {
                 ? _buildLoadingCard()
                 : elderly == null
                     ? _buildEmptyCard(context)
-                    : _buildCard(context, elderly);
+                    : _buildCard(context, loadElderlyStore.elderly!);
           },
         ),
       ),

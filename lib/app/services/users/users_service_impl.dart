@@ -23,17 +23,14 @@ class UsersServiceImpl implements IUsersService {
   }
 
   @override
-  Future<Users?> getUserByEmail({
-    required String email,
+  Future<Users?> getUserById({
+    required String id,
     required String accessToken,
   }) async {
     Users? user;
 
-    final response = await _httpClient.get(
-      '/users/email/$email',
-      token: accessToken,
-      queryParameters: {'isElderly': false},
-    );
+    final response =
+        await _httpClient.get('/users/elderly/id/$id', token: accessToken);
     if (response.data != null) user = Users.fromMap(response.data);
 
     return user;

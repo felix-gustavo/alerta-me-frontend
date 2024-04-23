@@ -1,11 +1,10 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:mobx/mobx.dart';
 
 import '../../../exceptions/base_exception.dart';
 import '../../../exceptions/exceptions_impl.dart';
 import '../../../model/authorizations.dart';
 import '../../../services/authorization/authorization_service.dart';
-import '../../auth/auth_store.dart';
-
 part 'create_autorization_store.g.dart';
 
 class CreateAuthorizationStore = CreateAuthorizationStoreBase
@@ -13,13 +12,12 @@ class CreateAuthorizationStore = CreateAuthorizationStoreBase
 
 abstract class CreateAuthorizationStoreBase with Store {
   late final IAuthorizationService _service;
-  late final AuthStore _authStore;
+  late final FirebaseAuth _auth;
 
   CreateAuthorizationStoreBase({
     required IAuthorizationService authorizationService,
-    required AuthStore authStore,
   })  : _service = authorizationService,
-        _authStore = authStore;
+        _auth = FirebaseAuth.instance;
 
   @observable
   Authorizations? authorization;
@@ -38,7 +36,7 @@ abstract class CreateAuthorizationStoreBase with Store {
     try {
       errorMessage = null;
 
-      final accessToken = _authStore.authUser?.accessToken;
+      final accessToken = await _auth.currentUser?.getIdToken();
       if (accessToken == null) throw SessionExpiredException();
 
       _future = ObservableFuture(

@@ -1,22 +1,20 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:mobx/mobx.dart';
 
 import '../../../exceptions/base_exception.dart';
 import '../../../exceptions/exceptions_impl.dart';
 import '../../../services/users/users_service.dart';
-import '../../auth/auth_store.dart';
 part 'delete_elderly_store.g.dart';
 
 class DeleteElderlyStore = DeleteElderlyStoreBase with _$DeleteElderlyStore;
 
 abstract class DeleteElderlyStoreBase with Store {
   late final IUsersService _service;
-  late final AuthStore _authStore;
+  late final FirebaseAuth _auth;
 
-  DeleteElderlyStoreBase({
-    required IUsersService usersService,
-    required AuthStore authStore,
-  })  : _service = usersService,
-        _authStore = authStore;
+  DeleteElderlyStoreBase({required IUsersService usersService})
+      : _service = usersService,
+        _auth = FirebaseAuth.instance;
 
   @observable
   String? elderlyId;
@@ -35,7 +33,7 @@ abstract class DeleteElderlyStoreBase with Store {
     try {
       errorMessage = null;
 
-      final accessToken = _authStore.authUser?.accessToken;
+      final accessToken = await _auth.currentUser?.getIdToken();
       if (accessToken == null) throw SessionExpiredException();
 
       _future = ObservableFuture(
@@ -45,5 +43,12 @@ abstract class DeleteElderlyStoreBase with Store {
     } on IBaseException catch (e) {
       errorMessage = e.message;
     }
+  }
+
+  @action
+  void clear() {
+    errorMessage = null;
+    _future = ObservableFuture.value(null);
+    elderlyId = null;
   }
 }

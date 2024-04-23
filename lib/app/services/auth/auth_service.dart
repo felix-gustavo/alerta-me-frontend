@@ -1,9 +1,7 @@
-import '../../model/auth_user.dart';
-import 'providers/login_provider.dart';
+import '../../model/user_min.dart';
 
 abstract interface class IAuthService {
-  Future<AuthUser> getAuthUser();
-
-  Future<AuthUser?> signIn(ILoginProvider loginProvider);
+  UserMin? getAuthUser();
+  Future<void> signIn();
   Future<void> signOut();
 }

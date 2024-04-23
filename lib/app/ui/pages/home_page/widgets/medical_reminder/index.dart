@@ -6,7 +6,6 @@ import 'package:skeletons/skeletons.dart';
 import '../../../../../model/authorizations.dart';
 import '../../../../../model/medical_reminder.dart';
 import '../../../../../shared/extensions/app_styles_extension.dart';
-import '../../../../../shared/extensions/colors_app_extension.dart';
 import '../../../../../shared/extensions/iterable_extension.dart';
 import '../../../../../stores/authorization/autorization/authorization_store.dart';
 import '../../../../../stores/medical_reminder/load_medical_reminder/load_medical_reminder_store.dart';
@@ -64,26 +63,6 @@ class _MedicalReminderWidgetState extends State<MedicalReminderWidget> {
     );
   }
 
-  Widget _buildNoReminder() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Não há lembretes recentes',
-          style: Theme.of(context).textTheme.titleMedium,
-        ),
-        const SizedBox(height: 9),
-        Text(
-          'Experimente criar lembretes de consultas',
-          style: Theme.of(context)
-              .textTheme
-              .bodyMedium!
-              .copyWith(color: context.colors.grey),
-        ),
-      ],
-    );
-  }
-
   Widget _buildReminders(List<MedicalReminder> medicalReminders) {
     final medicalRemindersCardsList = medicalReminders.map((mr) {
       return InkWell(
@@ -121,10 +100,7 @@ class _MedicalReminderWidgetState extends State<MedicalReminderWidget> {
     );
   }
 
-  Widget _buildAddMedicalReminderButton() {
-    final authorizationApproved = _authorizationStore.authorization?.status ==
-        AuthorizationStatus.aprovado;
-
+  Widget _buildAddMedicalReminderButton(bool authorizationApproved) {
     return IconButton(
       onPressed: authorizationApproved
           ? () {
@@ -157,31 +133,40 @@ class _MedicalReminderWidgetState extends State<MedicalReminderWidget> {
     return Observer(
       builder: (_) {
         final medicalReminders = _loadMedicalReminderStore.medicalReminders;
+        final authorizationApproved =
+            _authorizationStore.authorization?.status ==
+                AuthorizationStatus.aprovado;
+
+        print('mudou medicalReminders: $medicalReminders');
 
         return ContainerReminder(
-          action: _buildAddMedicalReminderButton(),
+          action: _buildAddMedicalReminderButton(authorizationApproved),
           page: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               ..._loadMedicalReminderStore.loading
                   ? [_buildLoading()]
                   : [
-                      IntrinsicWidth(
-                        child: LabeledCheckbox(
-                          label: 'Mostrar todas as consultas',
-                          onChanged: (value) async {
-                            await _loadMedicalReminderStore.run(
-                                withPast: value);
-                            setState(() => _showPastReminders = value);
-                          },
-                          padding: const EdgeInsets.all(6),
-                          value: _showPastReminders,
+                      if (authorizationApproved)
+                        IntrinsicWidth(
+                          child: LabeledCheckbox(
+                            label: 'Mostrar todas as consultas',
+                            onChanged: (value) async {
+                              await _loadMedicalReminderStore.run(
+                                withPast: value,
+                              );
+                              setState(() => _showPastReminders = value);
+                            },
+                            value: _showPastReminders,
+                          ),
                         ),
-                      ),
                       medicalReminders.isNotEmpty
                           ? _buildReminders(medicalReminders)
-                          : _buildNoReminder(),
-                    ],
+                          : Text(
+                              'Não há lembretes',
+                              style: Theme.of(context).textTheme.bodyMedium,
+                            ),
+                    ].separator(const SizedBox(height: 21)),
             ],
           ),
           pageName: 'Consultas',

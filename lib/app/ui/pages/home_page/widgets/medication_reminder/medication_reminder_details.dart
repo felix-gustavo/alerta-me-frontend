@@ -15,13 +15,12 @@ import '../../../../common_components/my_dialog.dart';
 import 'medication_reminder_edit.dart';
 
 class MedicationReminderDetails extends StatefulWidget {
-  final MedicationReminder _medReminder;
+  final MedicationReminder medicationReminder;
 
   const MedicationReminderDetails({
     Key? key,
-    required MedicationReminder medicationReminder,
-  })  : _medReminder = medicationReminder,
-        super(key: key);
+    required this.medicationReminder,
+  }) : super(key: key);
 
   @override
   State<MedicationReminderDetails> createState() =>
@@ -107,7 +106,7 @@ class _MedicationReminderDetailsState extends State<MedicationReminderDetails> {
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 3),
               child: Text(
-                '${dosage.amount} ${widget._medReminder.dosageUnit}',
+                '${dosage.amount} ${widget.medicationReminder.dosageUnit}',
                 style: textTheme.bodyMedium!.copyWith(
                   color: context.colors.grey,
                 ),
@@ -130,8 +129,8 @@ class _MedicationReminderDetailsState extends State<MedicationReminderDetails> {
           children: [
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 6),
-              child:
-                  Text(widget._medReminder.name, style: textTheme.titleMedium),
+              child: Text(widget.medicationReminder.name,
+                  style: textTheme.titleMedium),
             ),
             const Divider(),
             IntrinsicHeight(
@@ -140,7 +139,7 @@ class _MedicationReminderDetailsState extends State<MedicationReminderDetails> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  ...widget._medReminder.dose.entries.map(
+                  ...widget.medicationReminder.dose.entries.map(
                     (entry) => Row(
                       children: [
                         Padding(
@@ -175,7 +174,7 @@ class _MedicationReminderDetailsState extends State<MedicationReminderDetails> {
                           ),
                         ),
                         if (entry.key.index !=
-                            widget._medReminder.dose.length - 1)
+                            widget.medicationReminder.dose.length - 1)
                           VerticalDivider(
                             color: context.colors.lightGrey.withOpacity(.33),
                           ),
@@ -185,8 +184,8 @@ class _MedicationReminderDetailsState extends State<MedicationReminderDetails> {
                 ],
               ),
             ),
-            if (widget._medReminder.comments != null &&
-                widget._medReminder.comments!.isNotEmpty) ...[
+            if (widget.medicationReminder.comments != null &&
+                widget.medicationReminder.comments!.isNotEmpty) ...[
               const Divider(),
               SizedBox(
                 width: _maxWidth,
@@ -202,7 +201,7 @@ class _MedicationReminderDetailsState extends State<MedicationReminderDetails> {
                       ),
                       const SizedBox(height: 9),
                       Text(
-                        widget._medReminder.comments!,
+                        widget.medicationReminder.comments!,
                         textAlign: TextAlign.justify,
                       ),
                     ],
@@ -224,14 +223,14 @@ class _MedicationReminderDetailsState extends State<MedicationReminderDetails> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(widget._medReminder.name, style: textTheme.bodyLarge),
+          Text(widget.medicationReminder.name, style: textTheme.bodyLarge),
           Text(
             'Horários e dosagens',
             style: textTheme.bodyMedium!.copyWith(color: context.colors.grey),
           ),
           Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: widget._medReminder.dose.entries
+            children: widget.medicationReminder.dose.entries
                 .map((entry) {
                   final hasDosages = entry.value != null;
 
@@ -284,14 +283,14 @@ class _MedicationReminderDetailsState extends State<MedicationReminderDetails> {
                 .separator(const SizedBox(height: 6))
                 .toList(),
           ),
-          if (widget._medReminder.comments != null &&
-              widget._medReminder.comments!.isNotEmpty) ...[
+          if (widget.medicationReminder.comments != null &&
+              widget.medicationReminder.comments!.isNotEmpty) ...[
             Text(
               'Comentários',
               style: textTheme.bodyMedium!.copyWith(color: context.colors.grey),
             ),
             Text(
-              widget._medReminder.comments!,
+              widget.medicationReminder.comments!,
               style: textTheme.bodyMedium!.copyWith(
                 color: context.colors.grey,
               ),
@@ -321,11 +320,11 @@ class _MedicationReminderDetailsState extends State<MedicationReminderDetails> {
       builder: (context) => ConfirmDialog(
         title: 'Exclusão de lembrete de medicamento',
         content:
-            'O lembrete para o medicamento ${widget._medReminder.name} será excluído, deseja realmente excluir?',
+            'O lembrete para o medicamento ${widget.medicationReminder.name} será excluído, deseja realmente excluir?',
         negativeBtnText: 'Não',
         positiveBtnText: 'Sim',
         onPostivePressed: () async {
-          final id = widget._medReminder.id;
+          final id = widget.medicationReminder.id;
           if (id != null) {
             Navigator.of(context).pop();
             await _deleteMedicationReminderStore.run(id: id).then((_) {
@@ -349,7 +348,7 @@ class _MedicationReminderDetailsState extends State<MedicationReminderDetails> {
         child: SizedBox(
           width: 549,
           child: MedicationReminderEditWidget(
-            medicationReminder: widget._medReminder,
+            medicationReminder: widget.medicationReminder,
           ),
         ),
       ),

@@ -4,43 +4,33 @@ import '../../shared/extensions/colors_app_extension.dart';
 
 class LabeledCheckbox extends StatelessWidget {
   final String label;
-  final EdgeInsets padding;
   final bool value;
   final ValueChanged<bool> onChanged;
 
   const LabeledCheckbox({
     super.key,
     required this.label,
-    required this.padding,
     required this.value,
     required this.onChanged,
   });
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
+    return ListTile(
       onTap: () => onChanged(!value),
-      child: Padding(
-        padding: padding,
-        child: Row(
-          children: <Widget>[
-            Expanded(
-              child: Text(
-                label,
-                style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                      color: context.colors.grey,
-                    ),
-              ),
-            ),
-            Transform.scale(
-              scale: 0.9,
-              child: Checkbox(
-                value: value,
-                onChanged: (bool? newValue) => onChanged(newValue!),
-              ),
-            ),
-          ],
-        ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      minLeadingWidth: 6,
+      title: Text(
+        label,
+        style: Theme.of(context)
+            .textTheme
+            .bodyMedium!
+            .copyWith(color: context.colors.grey),
+      ),
+      leading: Icon(
+        value ? Icons.check_box : Icons.check_box_outline_blank,
+        color: value ? context.colors.secondary : context.colors.grey,
+        size: 21,
       ),
     );
   }

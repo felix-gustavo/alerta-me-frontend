@@ -1,41 +1,52 @@
 import 'package:firebase_auth/firebase_auth.dart';
 
-import '../../exceptions/exceptions_impl.dart';
-import '../../model/auth_user.dart';
-import '../users/users_service.dart';
+import '../../model/user_min.dart';
 import 'auth_service.dart';
-import 'providers/login_provider.dart';
 
 class AuthServiceImpl implements IAuthService {
-  ILoginProvider? _loginProvider;
   final FirebaseAuth _auth;
-  final IUsersService _usersService;
+  // final IHttpClient _httpClient;
 
-  AuthServiceImpl({required IUsersService usersService})
-      : _auth = FirebaseAuth.instance,
-        _usersService = usersService;
+  AuthServiceImpl()
+      :
+        // _httpClient = HttpClientDioImpl.instance,
+        _auth = FirebaseAuth.instance;
 
   @override
-  Future<AuthUser> getAuthUser() async {
+  UserMin? getAuthUser() {
     final currentUser = _auth.currentUser;
-    final accessToken = await currentUser?.getIdToken();
+    if (currentUser == null) return null;
 
-    print('token: $accessToken');
-
-    if (accessToken == null) throw SessionExpiredException();
-
-    final user = await _usersService.getUserByToken(accessToken);
-    if (user == null) throw SessionExpiredException();
-
-    return AuthUser(user: user, accessToken: accessToken);
+    return UserMin(
+      name: currentUser.displayName ?? '',
+      email: currentUser.email ?? '',
+    );
   }
 
   @override
-  Future<AuthUser?> signIn(ILoginProvider loginProvider) async {
-    _loginProvider = loginProvider;
-    return _loginProvider?.signIn();
+  Future<UserMin?> signIn() async {
+    try {
+      final userCredential = await _auth.signInWithPopup(GoogleAuthProvider());
+      final user = userCredential.user;
+
+      if (user != null) {
+        final idToken = await user.getIdToken();
+
+        if (idToken != null) {
+          // final response = await _httpClient.post(
+          //   '/auth/sign-in',
+          //   data: {'idToken': idToken},
+          // );
+
+          return UserMin(name: user.displayName ?? '', email: user.email ?? '');
+        }
+      }
+    } on FirebaseException catch (error) {
+      print('error, $error');
+    }
+    return null;
   }
 
   @override
-  Future<void> signOut() async => _auth.signOut();
+  Future<void> signOut() => _auth.signOut();
 }

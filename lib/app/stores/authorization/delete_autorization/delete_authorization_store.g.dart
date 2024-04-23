@@ -72,6 +72,20 @@ mixin _$DeleteAuthorizationStore on DeleteAuthorizationStoreBase, Store {
     return _$runAsyncAction.run(() => super.run());
   }
 
+  late final _$DeleteAuthorizationStoreBaseActionController =
+      ActionController(name: 'DeleteAuthorizationStoreBase', context: context);
+
+  @override
+  void clear() {
+    final _$actionInfo = _$DeleteAuthorizationStoreBaseActionController
+        .startAction(name: 'DeleteAuthorizationStoreBase.clear');
+    try {
+      return super.clear();
+    } finally {
+      _$DeleteAuthorizationStoreBaseActionController.endAction(_$actionInfo);
+    }
+  }
+
   @override
   String toString() {
     return '''

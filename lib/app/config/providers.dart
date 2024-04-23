@@ -12,6 +12,7 @@ import '../stores/auth/auth_store.dart';
 import '../stores/authorization/autorization/authorization_store.dart';
 import '../stores/authorization/create_autorization/create_autorization_store.dart';
 import '../stores/authorization/delete_autorization/delete_authorization_store.dart';
+import '../stores/elderly/load_elderly/load_elderly_store.dart';
 import '../stores/medical_reminder/delete_medical_reminder/delete_medical_reminder_store.dart';
 import '../stores/medical_reminder/edit_medical_reminder/edit_medical_reminder_store.dart';
 import '../stores/medical_reminder/load_medical_reminder/load_medical_reminder_store.dart';
@@ -24,50 +25,44 @@ import '../stores/water_reminder/edit_water_reminder/edit_water_reminder_store.d
 import '../stores/water_reminder/load_water_reminder/load_water_reminder_store.dart';
 
 List<SingleChildWidget> getProviders() {
-  final userService = UsersServiceImpl(
-    httpClient: HttpClientDioImpl.instance,
-  );
-
-  final authService = AuthServiceImpl(usersService: userService);
+  final userService = UsersServiceImpl(httpClient: HttpClientDioImpl.instance);
+  final authService = AuthServiceImpl();
 
   return [
     Provider<AuthStore>(
       create: (_) => AuthStore(authService: authService),
     ),
-    ProxyProvider<AuthStore, DeleteUserStore>(
-      update: (_, authStore, __) => DeleteUserStore(
-        usersService: userService,
-        authStore: authStore,
-      ),
+    Provider<DeleteUserStore>(
+      create: (_) => DeleteUserStore(usersService: userService),
     ),
-    ProxyProvider<AuthStore, DeleteElderlyStore>(
-      update: (_, authStore, __) => DeleteElderlyStore(
-        usersService: userService,
-        authStore: authStore,
-      ),
+    Provider<DeleteElderlyStore>(
+      create: (_) => DeleteElderlyStore(usersService: userService),
     ),
-    ProxyProvider<AuthStore, CreateAuthorizationStore>(
-      update: (_, authStore, __) => CreateAuthorizationStore(
+    Provider<CreateAuthorizationStore>(
+      create: (_) => CreateAuthorizationStore(
         authorizationService: AuthorizationServiceImpl(
           httpClient: HttpClientDioImpl.instance,
         ),
-        authStore: authStore,
       ),
     ),
-    ProxyProvider<AuthStore, AuthorizationStore>(
-      update: (_, authStore, __) => AuthorizationStore(
+    Provider<AuthorizationStore>(
+      create: (_) => AuthorizationStore(
         authorizationService: AuthorizationServiceImpl(
           httpClient: HttpClientDioImpl.instance,
         ),
-        authStore: authStore,
       ),
     ),
-    ProxyProvider<AuthStore, DeleteAuthorizationStore>(
-      update: (_, authStore, __) => DeleteAuthorizationStore(
+    ProxyProvider<AuthorizationStore, LoadElderlyStore>(
+      update: (_, authorizationStore, __) => LoadElderlyStore(
+        authorizationStore: authorizationStore,
+        service: userService,
+      ),
+    ),
+    Provider<DeleteAuthorizationStore>(
+      create: (_) => DeleteAuthorizationStore(
         authorizationService: AuthorizationServiceImpl(
           httpClient: HttpClientDioImpl.instance,
         ),
-        authStore: authStore,
       ),
     ),
     Provider<EditWaterReminderStore>(

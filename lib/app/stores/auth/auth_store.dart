@@ -1,11 +1,8 @@
-import 'package:flutter/material.dart';
 import 'package:mobx/mobx.dart';
 
 import '../../exceptions/base_exception.dart';
-import '../../model/auth_user.dart';
-import '../../model/users.dart';
+import '../../model/user_min.dart';
 import '../../services/auth/auth_service.dart';
-import '../../services/auth/providers/login_provider.dart';
 
 part 'auth_store.g.dart';
 
@@ -18,40 +15,33 @@ abstract class AuthStoreBase with Store {
       : _authService = authService;
 
   @observable
-  AuthUser? authUser;
-
-  @computed
-  Users? get user => authUser?.user;
+  UserMin? userMin;
 
   @observable
-  String? error;
-
-  @computed
-  ValueNotifier<bool> get isAuthenticated =>
-      ValueNotifier<bool>(authUser != null);
+  String? errorMessage;
 
   @observable
   bool loading = false;
 
   @action
-  Future<void> signIn(LoginProviders loginProvider) async {
+  Future<void> signIn() async {
     loading = true;
     try {
-      authUser = await _authService.signIn(loginProvider.implementation());
+      await _authService.signIn();
     } on IBaseException catch (error) {
-      this.error = error.message;
+      errorMessage = error.message;
     } finally {
       loading = false;
     }
   }
 
   @action
-  Future<void> initAuthUser() async {
+  void initAuthUser() {
     loading = true;
     try {
-      authUser = await _authService.getAuthUser();
+      userMin ??= _authService.getAuthUser();
     } on IBaseException catch (_) {
-      if (authUser != null) authUser = null;
+      if (userMin != null) userMin = null;
     } finally {
       loading = false;
     }
@@ -60,9 +50,9 @@ abstract class AuthStoreBase with Store {
   @action
   Future<void> signOut() async {
     loading = true;
-    if (authUser != null) await _authService.signOut();
-    authUser = null;
-    error = null;
+    if (userMin != null) await _authService.signOut();
+    userMin = null;
+    errorMessage = null;
     loading = false;
   }
 }

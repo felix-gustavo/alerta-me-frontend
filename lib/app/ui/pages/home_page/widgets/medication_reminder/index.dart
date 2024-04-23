@@ -5,14 +5,12 @@ import 'package:skeletons/skeletons.dart';
 
 import '../../../../../model/authorizations.dart';
 import '../../../../../model/medication_reminder.dart';
-import '../../../../../shared/extensions/colors_app_extension.dart';
 import '../../../../../shared/extensions/iterable_extension.dart';
 import '../../../../../stores/authorization/autorization/authorization_store.dart';
 import '../../../../../stores/medication_reminder/load_medication_reminder/load_medication_reminder_store.dart';
 import '../../../../common_components/container_reminder.dart';
 import '../../../../common_components/my_dialog.dart';
 import 'medication_reminder_card.dart';
-import 'medication_reminder_details.dart';
 import 'medication_reminder_edit.dart';
 
 class MedicationReminderWidget extends StatefulWidget {
@@ -27,8 +25,6 @@ class _MedicationReminderWidgetState extends State<MedicationReminderWidget> {
   late final AuthorizationStore _authorizationStore;
   late final LoadMedicationReminderStore _loadMedicationReminderStore;
   late final ScrollController _remindersScollController = ScrollController();
-
-  late String? _hoverId = '';
 
   @override
   void initState() {
@@ -62,45 +58,11 @@ class _MedicationReminderWidgetState extends State<MedicationReminderWidget> {
     );
   }
 
-  Widget _buildNoReminder() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Não há lembretes',
-          style: Theme.of(context).textTheme.titleMedium,
-        ),
-        const SizedBox(height: 9),
-        Text(
-          'Experimente criar lembretes de medicamentos',
-          style: Theme.of(context)
-              .textTheme
-              .bodyMedium!
-              .copyWith(color: context.colors.grey),
-        ),
-      ],
-    );
-  }
-
   Widget _buildReminders(List<MedicationReminder> medicationReminders) {
+    print('_buildReminders: ${medicationReminders.length}');
+
     final medicationRemindersCards = medicationReminders.map(
-      (mr) => InkWell(
-        onTap: () {
-          showDialog(
-            context: context,
-            builder: (_) => MyDialog(
-              title: 'Detalhes de Lembrete de Medicamento',
-              confirmPop: false,
-              child: MedicationReminderDetails(medicationReminder: mr),
-            ),
-          );
-        },
-        onHover: (value) => setState(() => _hoverId = value ? mr.id : ''),
-        child: MedicationReminderCard(
-          medicationReminder: mr,
-          isHover: _hoverId == mr.id,
-        ),
-      ),
+      (mr) => MedicationReminderCard(medicationReminder: mr),
     );
 
     return Scrollbar(
@@ -143,7 +105,7 @@ class _MedicationReminderWidgetState extends State<MedicationReminderWidget> {
       icon: const Icon(Icons.add),
       splashRadius: 18,
       tooltip: !authorizationApproved
-          ? 'Vincule-se a uma pessoa idosa para configurar este lembrete'
+          ? 'Vincule-se a uma pessoa idosa para criar lembretes'
           : null,
     );
   }
@@ -160,7 +122,10 @@ class _MedicationReminderWidgetState extends State<MedicationReminderWidget> {
               ? _buildLoading()
               : medicationReminders.isNotEmpty
                   ? _buildReminders(medicationReminders)
-                  : _buildNoReminder(),
+                  : Text(
+                      'Não há lembretes',
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    ),
           pageName: 'Medicamento',
           history: const Text('Histórico em breve'),
         );

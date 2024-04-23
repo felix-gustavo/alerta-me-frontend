@@ -9,7 +9,6 @@ import '../../../../../model/medication_reminder.dart';
 import '../../../../../shared/extensions/app_styles_extension.dart';
 import '../../../../../shared/extensions/colors_app_extension.dart';
 import '../../../../../shared/extensions/iterable_extension.dart';
-import '../../../../../shared/extensions/time_of_day_extension.dart';
 import '../../../../../stores/medication_reminder/edit_medication_reminder/edit_medication_reminder_store.dart';
 import '../../../../../stores/medication_reminder/load_medication_reminder/load_medication_reminder_store.dart';
 import 'medication_reminder_dose_section.dart';
@@ -53,6 +52,7 @@ class _MedicalReminderEditWidgetState
 
     _medicationReminder =
         widget.medicationReminder ?? MedicationReminder.empty();
+
     _medicationNameControl = TextEditingController(
       text: _medicationReminder.name,
     );
@@ -106,6 +106,7 @@ class _MedicalReminderEditWidgetState
   void dispose() {
     _medicationNameControl.dispose();
     _dosageUnitControl.dispose();
+    _dosagePronunciationControl.dispose();
     _commentsControl.dispose();
 
     _formKey.currentState?.dispose();
@@ -115,52 +116,81 @@ class _MedicalReminderEditWidgetState
   }
 
   Future<void> _submit() async {
-    final doseFiltered = _medicationReminder.dose.map(
-      (weekday, dosages) => MapEntry(
-        weekday,
-        _isActivated[weekday]! ? dosages : null,
-      ),
-    );
+    print('submit: ');
+    final formValid = _formKey.currentState?.validate() ?? false;
 
-    final medicationReminder = _medicationReminder.copyWith(dose: doseFiltered);
-    bool hasDuplicateTime = false;
+    if (formValid) {
+      final doseFiltered = _medicationReminder.dose.map(
+        (weekday, dosages) => MapEntry(
+          weekday,
+          _isActivated[weekday]! ? dosages : null,
+        ),
+      );
 
-    medicationReminder.dose.forEach((key, value) {
-      if (value != null) {
-        final Set<TimeOfDay> uniqueTimes = <TimeOfDay>{};
+      final medicationReminder =
+          _medicationReminder.copyWith(dose: doseFiltered);
+      bool hasDuplicateTime = false;
 
-        for (final dose in value) {
-          final time = dose.time;
+      for (int i = 0; i < medicationReminder.dose.length; i++) {
+        final value = medicationReminder.dose[i];
+        if (value != null) {
+          final Set<TimeOfDay> uniqueTimes = <TimeOfDay>{};
 
-          if (uniqueTimes.contains(time)) {
-            hasDuplicateTime = true;
-            EasyLoading.showError('Horários duplicados (${key.namePtBr})');
-            break;
-          } else {
-            uniqueTimes.add(time);
+          for (final dose in value) {
+            final time = dose.time;
+
+            if (uniqueTimes.contains(time)) {
+              hasDuplicateTime = true;
+              EasyLoading.showError(
+                'Horários duplicados (${medicationReminder.dose.keys.elementAt(i).namePtBr})',
+              );
+              break;
+            } else {
+              uniqueTimes.add(time);
+            }
           }
         }
       }
-    });
 
-    if (!hasDuplicateTime) {
-      await _editMedicationReminderStore.run(data: medicationReminder).then(
-        (_) {
-          final navigator = Navigator.of(context);
+      medicationReminder.dose.forEach((key, value) {
+        if (value != null) {
+          final Set<TimeOfDay> uniqueTimes = <TimeOfDay>{};
 
-          final errorMessage = _editMedicationReminderStore.errorMessage;
-          errorMessage != null
-              ? EasyLoading.showError(errorMessage)
-              : EasyLoading.showSuccess('Configuração salva');
+          for (final dose in value) {
+            final time = dose.time;
 
-          navigator.pop();
-        },
-      );
+            if (uniqueTimes.contains(time)) {
+              hasDuplicateTime = true;
+              EasyLoading.showError('Horários duplicados (${key.namePtBr})');
+              break;
+            } else {
+              uniqueTimes.add(time);
+            }
+          }
+        }
+      });
+
+      if (!hasDuplicateTime) {
+        await _editMedicationReminderStore.run(data: medicationReminder).then(
+          (_) {
+            final navigator = Navigator.of(context);
+
+            final errorMessage = _editMedicationReminderStore.errorMessage;
+            errorMessage != null
+                ? EasyLoading.showError(errorMessage)
+                : EasyLoading.showSuccess('Configuração salva');
+
+            navigator.pop();
+          },
+        );
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    print('Medication_reminder_edit: ${_medicationReminder.dose}');
+
     final textTheme = Theme.of(context).textTheme;
     final controlButtons = [
       if (_currentPage == 1)
@@ -174,7 +204,7 @@ class _MedicalReminderEditWidgetState
           child: Text(
             'Voltar',
             style: textTheme.bodyMedium!.copyWith(
-              color: context.colors.grey,
+              color: context.colors.primary,
             ),
           ),
         ),
@@ -212,14 +242,6 @@ class _MedicalReminderEditWidgetState
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(
-            'Adicione informações referentes a medicamentos',
-            style: Theme.of(context)
-                .textTheme
-                .bodyMedium!
-                .copyWith(color: context.colors.grey),
-          ),
-          const SizedBox(height: 12),
           ExpandablePageView(
             controller: _pageController,
             scrollDirection: Axis.horizontal,
@@ -232,22 +254,26 @@ class _MedicalReminderEditWidgetState
                 commentsControl: _commentsControl,
               ),
               MedicationReminderDoseSection(
-                medicationReminder: _medicationReminder,
+                dose: _medicationReminder.dose,
+                dosageUnit: _medicationReminder.dosageUnit,
                 onExpand: ({required isExpand, required weekday}) {
-                  setState(() {
-                    _isActivated[weekday] = isExpand;
-                  });
+                  setState(() => _isActivated[weekday] = isExpand);
                 },
                 activated: _isActivated,
-                onChangeDose: ({required newDose}) => setState(() {
-                  newDose.forEach((key, value) {
-                    value?.sort((a, b) => a.time.compareTo(b.time));
+                onChangeDose: ({
+                  required Weekday weekday,
+                  List<Dosage>? dosage,
+                }) {
+                  setState(() {
+                    final medicationReminderDose = {
+                      ..._medicationReminder.dose
+                    };
+                    medicationReminderDose[weekday] = dosage;
+                    _medicationReminder = _medicationReminder.copyWith(
+                      dose: medicationReminderDose,
+                    );
                   });
-
-                  _medicationReminder = _medicationReminder.copyWith(
-                    dose: newDose,
-                  );
-                }),
+                },
               ),
             ],
           ),

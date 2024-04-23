@@ -72,6 +72,20 @@ mixin _$DeleteUserStore on DeleteUserStoreBase, Store {
     return _$runAsyncAction.run(() => super.run());
   }
 
+  late final _$DeleteUserStoreBaseActionController =
+      ActionController(name: 'DeleteUserStoreBase', context: context);
+
+  @override
+  dynamic clear() {
+    final _$actionInfo = _$DeleteUserStoreBaseActionController.startAction(
+        name: 'DeleteUserStoreBase.clear');
+    try {
+      return super.clear();
+    } finally {
+      _$DeleteUserStoreBaseActionController.endAction(_$actionInfo);
+    }
+  }
+
   @override
   String toString() {
     return '''

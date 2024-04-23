@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:form_validator/form_validator.dart';
 
 import '../../../../../shared/extensions/app_styles_extension.dart';
+import '../../../../../shared/extensions/colors_app_extension.dart';
 import '../../../../../shared/extensions/iterable_extension.dart';
 
 class MedicationReminderInfoSection extends StatefulWidget {
@@ -27,6 +28,7 @@ class _MedicationReminderInfoSectionState
     extends State<MedicationReminderInfoSection> {
   @override
   Widget build(BuildContext context) {
+    print('MedicationReminderInfoSection');
     final unityFields = [
       TextFormField(
         controller: widget.dosageUnitControl,
@@ -55,7 +57,41 @@ class _MedicationReminderInfoSectionState
     return Padding(
       padding: const EdgeInsets.only(top: 6),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          IntrinsicWidth(
+            child: Row(
+              children: [
+                Text(
+                  'Dados iniciais',
+                  style: Theme.of(context)
+                      .textTheme
+                      .bodyMedium!
+                      .copyWith(color: context.colors.primary),
+                ),
+                Flexible(
+                  child: Container(
+                    constraints: const BoxConstraints(maxWidth: 33),
+                    margin: const EdgeInsets.symmetric(horizontal: 6),
+                    width: double.infinity,
+                    height: 2,
+                    decoration: BoxDecoration(
+                      color: context.colors.grey,
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                  ),
+                ),
+                Text(
+                  'Dosagem',
+                  style: Theme.of(context)
+                      .textTheme
+                      .bodyMedium!
+                      .copyWith(color: context.colors.grey),
+                ),
+              ].separator(const SizedBox(width: 3)).toList(),
+            ),
+          ),
+          const SizedBox(height: 12),
           TextFormField(
             controller: widget.medicationNameControl,
             decoration: const InputDecoration(

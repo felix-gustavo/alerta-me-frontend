@@ -5,8 +5,7 @@ extension StringExtension on String {
   String get capitalize =>
       '${this[0].toUpperCase()}${substring(1).toLowerCase()}';
 
-  DateTime get stringUTCtoDateTime =>
-      DateFormat('yyyy-MM-ddThh:mm:ss').parseUTC(this).toLocal();
+  DateTime get stringUTCtoDateTime => DateTime.parse(this).toLocal();
 
   DateTime get dateBRLtoDateTime =>
       DateFormat('dd/MM/yyyy', 'pt_BR').parse(this);

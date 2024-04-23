@@ -4,15 +4,15 @@ import '../../../../../model/medication_reminder.dart';
 import '../../../../../shared/extensions/colors_app_extension.dart';
 import '../../../../../shared/extensions/iterable_extension.dart';
 import '../../../../../shared/extensions/time_of_day_extension.dart';
+import '../../../../common_components/my_dialog.dart';
+import 'medication_reminder_details.dart';
 
 class MedicationReminderCard extends StatefulWidget {
   final MedicationReminder medicationReminder;
-  final bool isHover;
 
   const MedicationReminderCard({
     Key? key,
     required this.medicationReminder,
-    this.isHover = false,
   }) : super(key: key);
 
   @override
@@ -20,12 +20,13 @@ class MedicationReminderCard extends StatefulWidget {
 }
 
 class _MedicalReminderCardState extends State<MedicationReminderCard> {
+  bool isHovered = false;
+
   Widget _buildChipTime(Dosage dosage) {
     final textTheme = Theme.of(context).textTheme;
 
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 1.2),
-      margin: const EdgeInsets.all(3),
+      padding: const EdgeInsets.all(3),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(3),
         color: context.colors.primaryLight,
@@ -42,6 +43,7 @@ class _MedicalReminderCardState extends State<MedicationReminderCard> {
 
   @override
   Widget build(BuildContext context) {
+    print('MedicationReminderCard');
     final textTheme = Theme.of(context).textTheme;
 
     final hasDosages = widget.medicationReminder.dose.entries
@@ -51,7 +53,7 @@ class _MedicalReminderCardState extends State<MedicationReminderCard> {
       child: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 12),
+            padding: const EdgeInsets.symmetric(vertical: 9),
             child: Text(
               widget.medicationReminder.name,
               style: textTheme.bodyLarge,
@@ -62,7 +64,7 @@ class _MedicalReminderCardState extends State<MedicationReminderCard> {
           const Divider(),
           !hasDosages
               ? Padding(
-                  padding: const EdgeInsets.all(6),
+                  padding: const EdgeInsets.all(9),
                   child: Text(
                     'Não há dosagens configuradas',
                     style: textTheme.bodyMedium!.copyWith(
@@ -77,6 +79,7 @@ class _MedicalReminderCardState extends State<MedicationReminderCard> {
                           (entry) => SizedBox(
                             width: 57,
                             child: Container(
+                              padding: const EdgeInsets.all(6),
                               decoration: BoxDecoration(
                                 border: Border(
                                   right: entry.key.index ==
@@ -91,15 +94,11 @@ class _MedicalReminderCardState extends State<MedicationReminderCard> {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.stretch,
                                 children: [
-                                  Padding(
-                                    padding:
-                                        const EdgeInsets.symmetric(vertical: 6),
-                                    child: Text(
-                                      entry.key.namePtBrShort,
-                                      textAlign: TextAlign.center,
-                                      style: textTheme.bodyMedium!.copyWith(
-                                        color: context.colors.grey,
-                                      ),
+                                  Text(
+                                    entry.key.namePtBrShort,
+                                    textAlign: TextAlign.center,
+                                    style: textTheme.bodyMedium!.copyWith(
+                                      color: context.colors.grey,
                                     ),
                                   ),
                                   ...entry.value
@@ -113,12 +112,14 @@ class _MedicalReminderCardState extends State<MedicationReminderCard> {
                                             );
                                           })
                                           .values
+                                          .separator(const SizedBox(height: 6))
                                           .toList() ??
                                       [SizedBox.fromSize()],
                                   if ((entry.value?.length ?? 0) > 2)
                                     Padding(
                                       padding: const EdgeInsets.symmetric(
-                                          vertical: 6),
+                                        vertical: 6,
+                                      ),
                                       child: Icon(
                                         Icons.more_vert,
                                         color: context.colors.grey,
@@ -137,17 +138,34 @@ class _MedicalReminderCardState extends State<MedicationReminderCard> {
       ),
     );
 
-    return Container(
-      clipBehavior: Clip.antiAlias,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(6),
-        border: Border.all(
-          color: widget.isHover
+    return Card(
+      elevation: 0,
+      clipBehavior: Clip.hardEdge,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(9),
+        side: BorderSide(
+          color: isHovered
               ? context.colors.primary.withOpacity(.46)
               : context.colors.lightGrey,
         ),
       ),
-      child: child,
+      child: InkWell(
+        overlayColor: const MaterialStatePropertyAll(Colors.transparent),
+        onHover: (value) => setState(() => isHovered = value),
+        onTap: () {
+          showDialog(
+            context: context,
+            builder: (_) => MyDialog(
+              title: 'Detalhes de Lembrete de Medicamento',
+              confirmPop: false,
+              child: MedicationReminderDetails(
+                medicationReminder: widget.medicationReminder,
+              ),
+            ),
+          );
+        },
+        child: child,
+      ),
     );
   }
 }

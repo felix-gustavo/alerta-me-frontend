@@ -6,7 +6,6 @@ import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:mobx/mobx.dart';
 import 'package:provider/provider.dart';
 
-import '../../../../../exceptions/exceptions_impl.dart';
 import '../../../../../model/water_reminder.dart';
 import '../../../../../shared/extensions/app_styles_extension.dart';
 import '../../../../../shared/extensions/colors_app_extension.dart';
@@ -16,7 +15,9 @@ import '../../../../../stores/water_reminder/edit_water_reminder/edit_water_remi
 import '../../../../../stores/water_reminder/load_water_reminder/load_water_reminder_store.dart';
 import '../../../../common_components/my_time_range_picker.dart';
 import '../../../../common_components/my_timeline.dart';
-import '../../../../common_components/redirect_to_login.dart';
+
+const kMinRange = 5;
+const kMaxRange = 120;
 
 class WaterReminderEditWidget extends StatefulWidget {
   final WaterReminder? waterReminder;
@@ -44,6 +45,8 @@ class _WaterReminderEditWidgetState extends State<WaterReminderEditWidget> {
   late final LoadWaterReminderStore _loadWaterReminderStore;
 
   late final ReactionDisposer disposer;
+
+  late List<TimeOfDay> scheduleReminders;
 
   @override
   void initState() {
@@ -124,6 +127,7 @@ class _WaterReminderEditWidgetState extends State<WaterReminderEditWidget> {
             start: _waterReminder.start,
             end: _waterReminder.end,
             interval: _waterReminder.interval,
+            onGeneratedReminders: (reminders) => scheduleReminders = reminders,
           ),
         ],
       ),
@@ -136,7 +140,7 @@ class _WaterReminderEditWidgetState extends State<WaterReminderEditWidget> {
     required Widget content,
   }) =>
       Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Text(label),
           Text(
@@ -178,12 +182,11 @@ class _WaterReminderEditWidgetState extends State<WaterReminderEditWidget> {
               SizedBox(
                 width: 281,
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     _buildFieldContainer(
                       label: 'Intervalo entre lembretes',
                       sublabel:
-                          'Escolha, em minutos, o intervalo entre cada lembrete (5 - 120)',
+                          'Escolha, em minutos, o intervalo entre cada lembrete ($kMinRange - $kMaxRange)',
                       content: Column(
                         children: [
                           Row(
@@ -194,50 +197,69 @@ class _WaterReminderEditWidgetState extends State<WaterReminderEditWidget> {
                                 color: context.colors.primary,
                                 splashRadius: 21,
                                 iconSize: 24,
-                                onPressed: _waterReminder.interval > 5
+                                onPressed: _waterReminder.interval > kMinRange
                                     ? () => _onChangeInterval(
-                                          _waterReminder.interval - 5,
+                                          _waterReminder.interval - kMinRange,
                                         )
                                     : null,
                               ),
                               RichText(
-                                text: TextSpan(children: [
-                                  TextSpan(
-                                    text: _waterReminder.interval.toString(),
-                                    style: textTheme.displaySmall,
-                                  ),
-                                  TextSpan(
-                                    text: ' min',
-                                    style: textTheme.bodyLarge!.copyWith(
-                                      color: context.colors.grey,
+                                text: TextSpan(
+                                  children: [
+                                    TextSpan(
+                                      text: _waterReminder.interval.toString(),
+                                      style: textTheme.displaySmall,
                                     ),
-                                  ),
-                                ]),
+                                    TextSpan(
+                                      text: 'min',
+                                      style: textTheme.labelLarge!.copyWith(
+                                        color: context.colors.grey,
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
                               IconButton(
                                 icon: const Icon(Icons.add_circle),
                                 color: context.colors.primary,
                                 splashRadius: 21,
                                 iconSize: 24,
-                                onPressed: _waterReminder.interval < 120
+                                onPressed: _waterReminder.interval < kMaxRange
                                     ? () => _onChangeInterval(
-                                        _waterReminder.interval + 5)
+                                        _waterReminder.interval + kMinRange)
                                     : null,
                               ),
                             ],
                           ),
                           Slider(
-                            min: 5,
-                            max: 120,
+                            min: kMinRange.toDouble(),
+                            max: kMaxRange.toDouble(),
                             value: _waterReminder.interval.toDouble(),
                             onChanged: (value) =>
                                 _onChangeInterval(value.toInt()),
-                            divisions: 23,
+                            divisions: (kMaxRange - kMinRange) ~/ kMinRange,
                           ),
                         ],
                       ),
                     ),
                     const SizedBox(height: 21),
+                    _buildFieldContainer(
+                      label: 'Quantidade de lembretes',
+                      sublabel:
+                          'Para o cálculo é levado em consideração o início e fim dos lembretes, bem como o intervalo entre cada lembrete',
+                      content: Text(
+                        _acc.ceil().toString(),
+                        style: textTheme.displaySmall,
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(
+                width: 281,
+                child: Column(
+                  children: [
                     _buildFieldContainer(
                       label: 'Quantidade de água',
                       sublabel:
@@ -263,11 +285,11 @@ class _WaterReminderEditWidgetState extends State<WaterReminderEditWidget> {
                             }
                             return null;
                           },
-                          onSaved: (newValue) {
-                            if (newValue != null && newValue.isNotEmpty) {
+                          onChanged: (value) {
+                            if (value.isNotEmpty) {
                               setState(() {
                                 _waterReminder = _waterReminder.copyWith(
-                                  amount: int.parse(newValue),
+                                  amount: int.parse(value),
                                 );
                               });
                             }
@@ -275,19 +297,31 @@ class _WaterReminderEditWidgetState extends State<WaterReminderEditWidget> {
                         ),
                       ),
                     ),
+                    const SizedBox(height: 21),
+                    _buildFieldContainer(
+                      label: 'Dose sugerida',
+                      sublabel: 'Representa a dose sugerida por lembrete',
+                      content: Text.rich(
+                        TextSpan(
+                          children: [
+                            TextSpan(
+                              text: (_waterReminder.amount / _acc.ceil())
+                                  .floor()
+                                  .toString(),
+                              style: textTheme.displaySmall,
+                            ),
+                            TextSpan(
+                              text: 'mL',
+                              style: textTheme.labelLarge!.copyWith(
+                                color: context.colors.grey,
+                              ),
+                            )
+                          ],
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    )
                   ],
-                ),
-              ),
-              SizedBox(
-                width: 281,
-                child: _buildFieldContainer(
-                  label: 'Quantidade de lembretes',
-                  sublabel:
-                      'Para o cálculo é levado em consideração o início e fim dos lembretes, bem como o intervalo entre cada lembrete',
-                  content: Text(
-                    _acc.ceil().toString(),
-                    style: textTheme.displaySmall,
-                  ),
                 ),
               )
             ],
@@ -300,26 +334,21 @@ class _WaterReminderEditWidgetState extends State<WaterReminderEditWidget> {
   Future<void> _submit() async {
     if (_formKey.currentState?.validate() ?? false) {
       _formKey.currentState!.save();
-      await _editWaterReminderStore
-          .run(waterReminder: _waterReminder, update: widget.toUpdate)
-          .then(
-        (_) {
-          final navigator = Navigator.of(context);
+      final navigator = Navigator.of(context);
 
-          final errorMessage = _editWaterReminderStore.errorMessage;
+      print('scheduleReminders: $scheduleReminders');
 
-          errorMessage != null
-              ? EasyLoading.showError(errorMessage)
-              : EasyLoading.showSuccess('Configuração salva');
-
-          navigator.pop();
-        },
-        onError: (error) async {
-          if (error is SessionExpiredException) {
-            await RedirectToLogin.show(context, error.message);
-          }
-        },
+      await _editWaterReminderStore.run(
+        waterReminder: _waterReminder.copyWith(reminders: scheduleReminders),
+        update: widget.toUpdate,
       );
+
+      final errorMessage = _editWaterReminderStore.errorMessage;
+      errorMessage != null
+          ? EasyLoading.showError(errorMessage)
+          : EasyLoading.showSuccess('Configuração salva');
+
+      navigator.pop();
     }
   }
 
@@ -334,44 +363,57 @@ class _WaterReminderEditWidgetState extends State<WaterReminderEditWidget> {
         children: [
           _buildFormEdit(maxWidth),
           _buildTimelineReview(),
-          Observer(
-            builder: (_) {
-              return Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
                 children: [
-                  Row(
-                    children: [
-                      Switch(
-                        value: _waterReminder.active,
-                        onChanged: (bool value) {
-                          setState(() {
-                            _waterReminder = _waterReminder.copyWith(
-                              active: value,
-                            );
-                          });
-                        },
-                      ),
-                      const SizedBox(width: 3),
-                      Text(
-                        'Ativo',
-                        style: Theme.of(context)
-                            .textTheme
-                            .bodyMedium!
-                            .copyWith(color: context.colors.grey),
-                      ),
-                    ],
+                  Switch(
+                    value: _waterReminder.active,
+                    onChanged: (bool value) {
+                      setState(() {
+                        _waterReminder = _waterReminder.copyWith(active: value);
+                      });
+                    },
                   ),
-                  Visibility(
+                  const SizedBox(width: 3),
+                  Text(
+                    'Ativo',
+                    style: Theme.of(context)
+                        .textTheme
+                        .bodyMedium!
+                        .copyWith(color: context.colors.grey),
+                  ),
+                ],
+              ),
+              Observer(
+                builder: (_) {
+                  int lastInterval = _waterReminder.interval;
+                  final reminders = scheduleReminders;
+                  if (reminders.isNotEmpty) {
+                    final last = reminders.last.convertToMinutes;
+
+                    final penultimate = reminders[
+                            reminders.length >= 2 ? reminders.length - 2 : 0]
+                        .convertToMinutes;
+
+                    lastInterval = last - penultimate;
+                    if (lastInterval < 0) lastInterval += 1440;
+                  }
+
+                  return Visibility(
                     visible: _editWaterReminderStore.loading,
                     replacement: ElevatedButton(
-                      onPressed: _submit,
+                      onPressed: lastInterval < _waterReminder.interval
+                          ? null
+                          : _submit,
                       child: const Text('Salvar'),
                     ),
                     child: const CircularProgressIndicator(),
-                  ),
-                ],
-              );
-            },
+                  );
+                },
+              ),
+            ],
           )
         ].separator(const SizedBox(height: 21)).toList(),
       ),

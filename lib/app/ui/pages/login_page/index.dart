@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:provider/provider.dart';
 
-import '../../../services/auth/providers/login_provider.dart';
 import '../../../shared/extensions/colors_app_extension.dart';
 import '../../../stores/auth/auth_store.dart';
 
@@ -55,7 +54,7 @@ class LoginPage extends StatelessWidget {
                   const Spacer(flex: 4),
                   Visibility(
                     visible: authStore.loading,
-                    replacement: authStore.error != null
+                    replacement: authStore.errorMessage != null
                         ? Container(
                             padding: const EdgeInsets.all(9),
                             decoration: BoxDecoration(
@@ -66,7 +65,7 @@ class LoginPage extends StatelessWidget {
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                Text(authStore.error ?? ''),
+                                Text(authStore.errorMessage ?? ''),
                                 const SizedBox(width: 6),
                                 Icon(
                                   Icons.error,
@@ -81,17 +80,9 @@ class LoginPage extends StatelessWidget {
                   ),
                   const Spacer(),
                   ElevatedButton(
-                    onPressed: () async {
-                      await authStore.signIn(LoginProviders.google);
-                    },
+                    onPressed:
+                        authStore.loading ? null : () => authStore.signIn(),
                     child: const Text('Login com Google'),
-                  ),
-                  const Spacer(),
-                  ElevatedButton(
-                    onPressed: () async {
-                      await authStore.signIn(LoginProviders.anon);
-                    },
-                    child: const Text('Usuário Demo'),
                   ),
                 ],
               );

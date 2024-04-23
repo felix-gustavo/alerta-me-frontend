@@ -54,26 +54,6 @@ class _WaterReminderWidgetState extends State<WaterReminderWidget>
     );
   }
 
-  Widget _buildNoWaterReminder() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Lembrete não configurado',
-          style: Theme.of(context).textTheme.titleMedium,
-        ),
-        const SizedBox(height: 9),
-        Text(
-          'É necessário configurar os lembretes',
-          style: Theme.of(context)
-              .textTheme
-              .bodyMedium!
-              .copyWith(color: context.colors.grey),
-        ),
-      ],
-    );
-  }
-
   Widget _buildWaterReminder(WaterReminder waterReminder) {
     final textTheme = Theme.of(context).textTheme;
 
@@ -273,7 +253,16 @@ class _WaterReminderWidgetState extends State<WaterReminderWidget>
               ? _buildLoading()
               : waterReminder != null
                   ? _buildWaterReminder(waterReminder)
-                  : _buildNoWaterReminder(),
+                  : Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        Text(
+                          'Lembrete não configurado',
+                          style: Theme.of(context).textTheme.bodyMedium,
+                        ),
+                      ],
+                    ),
           pageName: 'Água',
           history: const Text('Histórico em breve'),
         );
