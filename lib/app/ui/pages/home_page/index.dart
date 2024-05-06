@@ -4,7 +4,6 @@ import 'package:mobx/mobx.dart';
 import 'package:provider/provider.dart';
 
 import '../../../model/authorizations.dart';
-import '../../../model/users.dart';
 import '../../../shared/extensions/colors_app_extension.dart';
 import '../../../shared/extensions/datetime_extension.dart';
 import '../../../shared/extensions/iterable_extension.dart';
@@ -174,16 +173,19 @@ class _HomePageState extends State<HomePage>
                                 child: Center(
                                   child: Observer(
                                     builder: (context) {
-                                      final elderly = _loadElderlyStore.elderly;
+                                      final elderlyEmail =
+                                          _loadElderlyStore.elderly?.email;
                                       final status = _authorizationStore
                                           .authorization?.status;
+
                                       return Column(
                                         children: [
-                                          ...elderly != null && status != null
+                                          ...elderlyEmail != null &&
+                                                  status != null
                                               ? _buildElderlyInfoContent(
                                                   context,
                                                   textTheme,
-                                                  elderly,
+                                                  elderlyEmail,
                                                   status.name,
                                                 )
                                               : [
@@ -275,63 +277,6 @@ class _HomePageState extends State<HomePage>
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // LayoutBuilder(
-                    //   builder: (context, constraints) {
-                    //     final children = [
-                    //       const WaterReminderWidget(),
-                    //       Observer(
-                    //         builder: (_) {
-                    //           final approved =
-                    //               _authorizationStore.authorization?.status ==
-                    //                   AuthorizationStatus.aprovado;
-                    //           final elderly = _loadElderlyStore.elderly;
-
-                    //           return Card(
-                    //             child: Padding(
-                    //               padding: const EdgeInsets.all(12),
-                    //               child: Column(
-                    //                 children: [
-                    //                   Icon(
-                    //                     Icons.assignment_ind_rounded,
-                    //                     size: 45,
-                    //                     color: context.colors.primary,
-                    //                   ),
-                    //                   ...elderly != null && approved
-                    //                       ? _buildElderlyInfoContent(
-                    //                           context,
-                    //                           textTheme,
-                    //                           elderly,
-                    //                         )
-                    //                       : [
-                    //                           const Text(
-                    //                             'Vincule-se a uma pessoa idosa',
-                    //                           ),
-                    //                         ],
-                    //                 ]
-                    //                     .separator(const SizedBox(height: 6))
-                    //                     .toList(),
-                    //               ),
-                    //             ),
-                    //           );
-                    //         },
-                    //       ),
-                    //     ];
-                    //     return constraints.maxWidth <= 700
-                    //         ? Column(
-                    //             verticalDirection: VerticalDirection.up,
-                    //             children: children
-                    //                 .separator(const SizedBox(height: 12))
-                    //                 .toList(),
-                    //           )
-                    //         : Row(
-                    //             crossAxisAlignment: CrossAxisAlignment.start,
-                    //             children: [
-                    //               Expanded(child: children.first),
-                    //               children.last,
-                    //             ].separator(const SizedBox(width: 12)).toList(),
-                    //           );
-                    //   },
-                    // ),
                     const WaterReminderWidget(),
                     const MedicationReminderWidget(),
                     const MedicalReminderWidget(),
@@ -348,7 +293,7 @@ class _HomePageState extends State<HomePage>
   List<Widget> _buildElderlyInfoContent(
     BuildContext context,
     TextTheme textTheme,
-    Users elderly,
+    String elderlyEmail,
     String status,
   ) {
     return [
@@ -359,11 +304,7 @@ class _HomePageState extends State<HomePage>
       ),
       const Divider(endIndent: 6, indent: 6, height: 12),
       const SizedBox(height: 3),
-      Text(
-        elderly.name,
-        style: textTheme.bodyMedium!.copyWith(color: Colors.black),
-      ),
-      Text(elderly.email, style: textTheme.bodyMedium),
+      Text(elderlyEmail, style: textTheme.bodyMedium),
       Text('status: $status', style: textTheme.bodyMedium),
     ].separator(const SizedBox(height: 6)).toList();
   }

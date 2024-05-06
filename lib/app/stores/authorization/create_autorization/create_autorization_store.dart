@@ -46,4 +46,11 @@ abstract class CreateAuthorizationStoreBase with Store {
       errorMessage = e.message;
     }
   }
+
+  @action
+  void clear() {
+    errorMessage = null;
+    _future = ObservableFuture.value(null);
+    authorization = null;
+  }
 }

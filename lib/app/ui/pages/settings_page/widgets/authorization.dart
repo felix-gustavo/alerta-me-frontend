@@ -7,6 +7,7 @@ import 'package:provider/provider.dart';
 import '../../../../model/authorizations.dart';
 import '../../../../model/users.dart';
 import '../../../../shared/extensions/colors_app_extension.dart';
+import '../../../../shared/extensions/datetime_extension.dart';
 import '../../../../shared/extensions/iterable_extension.dart';
 import '../../../../stores/authorization/autorization/authorization_store.dart';
 import '../../../../stores/authorization/create_autorization/create_autorization_store.dart';
@@ -100,6 +101,7 @@ class _AuthorizarionWidgetState extends State<AuthorizarionWidget> {
             _createAuthorizationStore.authorization,
           );
           await _loadElderlyStore.run();
+          _createAuthorizationStore.clear();
         },
       ),
       when(
@@ -200,56 +202,20 @@ class _AuthorizarionWidgetState extends State<AuthorizarionWidget> {
       _formKey.currentState!.save();
 
       final authorization = _authorizationStore.authorization;
-      final elderly = _loadElderlyStore.elderly;
-      if (authorization?.status == AuthorizationStatus.negado &&
-          email == elderly?.email) {
-        showDialog(
-          context: context,
-          builder: (context) => const MyDialog(
-            confirmPop: false,
-            title: 'Pedido não registrado',
-            child: SizedBox(
-              width: 330,
-              child: Column(
-                children: [
-                  Text(
-                      'Tente enviar a solicitação para outro usuário ou peça para o usuário idoso reavaliar a sua solicitação atual'),
-                ],
-              ),
-            ),
-          ),
-        );
-      } else {
-        showDialog(
-          context: context,
-          builder: (context) {
-            return ConfirmDialog(
-              title: 'Confirmar pedido de autorização',
-              content: authorization?.status == AuthorizationStatus.negado
-                  ? 'Ao registrar um novo pedido, a solicitação para ${elderly?.email} será removida'
-                  : null,
-              positiveBtnText: 'Continuar',
-              negativeBtnText: 'Cancelar',
-              onPostivePressed: () async {
-                Navigator.of(context).pop();
+      // final elderly = _loadElderlyStore.elderly;
 
-                await _createAuthorizationStore.run(email: email);
-                if (_createAuthorizationStore.errorMessage != null) {
-                  EasyLoading.showInfo(
-                    _createAuthorizationStore.errorMessage!,
-                  );
-                } else if (authorization != null) {
-                  await _deleteAuthorizationStore.run();
-                  if (_deleteAuthorizationStore.errorMessage != null) {
-                    EasyLoading.showInfo(
-                      _deleteAuthorizationStore.errorMessage!,
-                    );
-                  }
-                }
-              },
-            );
-          },
+      await _createAuthorizationStore.run(email: email);
+      if (_createAuthorizationStore.errorMessage != null) {
+        EasyLoading.showInfo(
+          _createAuthorizationStore.errorMessage!,
         );
+      } else if (authorization != null) {
+        await _deleteAuthorizationStore.run();
+        if (_deleteAuthorizationStore.errorMessage != null) {
+          EasyLoading.showInfo(
+            _deleteAuthorizationStore.errorMessage!,
+          );
+        }
       }
     }
   }
@@ -342,6 +308,9 @@ class _AuthorizarionWidgetState extends State<AuthorizarionWidget> {
             fields.add(_buildField('Nome: ', elderly?.name ?? ''));
             fields.add(_buildField('Email: ', elderly?.email ?? ''));
             fields.add(_buildField('Status: ', authorization.status.name));
+            fields.add(
+              _buildField('Criado em: ', authorization.datetime.toDateBRL),
+            );
             fields = fields.separator(const SizedBox(height: 12)).toList();
           }
 
@@ -389,8 +358,8 @@ class _AuthorizarionWidgetState extends State<AuthorizarionWidget> {
                         color: Colors.black,
                       ),
                     ),
-                    if (!(authorization == null ||
-                        authorization.status == AuthorizationStatus.negado))
+                    if (authorization != null &&
+                        authorization.status == AuthorizationStatus.aguardando)
                       OutlinedButton(
                         onPressed: () {
                           showDialog(
@@ -428,9 +397,7 @@ class _AuthorizarionWidgetState extends State<AuthorizarionWidget> {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     ...fields,
-                    if (authorization == null ||
-                        authorization.status == AuthorizationStatus.negado)
-                      _buildNewAuthorization(),
+                    if (authorization == null) _buildNewAuthorization(),
                   ],
                 ),
               ),

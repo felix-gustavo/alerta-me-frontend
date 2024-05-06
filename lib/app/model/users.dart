@@ -4,13 +4,11 @@ class Users {
   final String id;
   final String name;
   final String email;
-  final bool isElderly;
 
   Users({
     required this.id,
     required this.name,
     required this.email,
-    required this.isElderly,
   });
 
   Map<String, dynamic> toMap() {
@@ -18,7 +16,6 @@ class Users {
       'id': id,
       'name': name,
       'email': email,
-      'is_elderly': isElderly,
     };
   }
 
@@ -27,7 +24,6 @@ class Users {
       id: map['id'] as String,
       name: map['name'] as String,
       email: map['email'] as String,
-      isElderly: map['is_elderly'] as bool,
     );
   }
 

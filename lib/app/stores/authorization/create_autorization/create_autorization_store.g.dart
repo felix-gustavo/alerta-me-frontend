@@ -72,6 +72,20 @@ mixin _$CreateAuthorizationStore on CreateAuthorizationStoreBase, Store {
     return _$runAsyncAction.run(() => super.run(email: email));
   }
 
+  late final _$CreateAuthorizationStoreBaseActionController =
+      ActionController(name: 'CreateAuthorizationStoreBase', context: context);
+
+  @override
+  void clear() {
+    final _$actionInfo = _$CreateAuthorizationStoreBaseActionController
+        .startAction(name: 'CreateAuthorizationStoreBase.clear');
+    try {
+      return super.clear();
+    } finally {
+      _$CreateAuthorizationStoreBaseActionController.endAction(_$actionInfo);
+    }
+  }
+
   @override
   String toString() {
     return '''
