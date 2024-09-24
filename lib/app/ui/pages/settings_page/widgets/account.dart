@@ -4,7 +4,6 @@ import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:mobx/mobx.dart';
 import 'package:provider/provider.dart';
 
-import '../../../../shared/extensions/colors_app_extension.dart';
 import '../../../../shared/extensions/iterable_extension.dart';
 import '../../../../stores/auth/auth_store.dart';
 import '../../../../stores/medical_reminder/load_medical_reminder/load_medical_reminder_store.dart';
@@ -74,24 +73,19 @@ class _AccountWidgetState extends State<AccountWidget> {
     super.dispose();
   }
 
-  Widget _buildField(String label, String value) {
-    return Wrap(
-      alignment: WrapAlignment.spaceBetween,
-      spacing: 6,
-      runSpacing: 6,
-      children: [
-        Text(label),
-        Text(value, overflow: TextOverflow.ellipsis),
-      ],
-    );
-  }
-
-  void _deleteAccount() {
+  void _deleteAccountDialog() {
     showDialog(
       context: context,
-      builder: (context) => MyDialog(
-        confirmPop: false,
+      builder: (context) => MyDialog.confirm(
         title: 'Excluir conta?',
+        loading: _deleteUserStore.loading,
+        action: () async {
+          Navigator.of(context).pop();
+          await _deleteUserStore.run();
+          if (_deleteUserStore.errorMessage != null) {
+            EasyLoading.showInfo(_deleteUserStore.errorMessage!);
+          }
+        },
         child: SizedBox(
           width: 400,
           child: Column(
@@ -106,29 +100,6 @@ class _AccountWidgetState extends State<AccountWidget> {
                 'A conta do usuário idoso não será removida'
               ].map((item) => UnorderedListItem(text: item)),
               const SizedBox(height: 27),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  TextButton(
-                    onPressed: () => Navigator.of(context).pop(),
-                    child: const Text('Não'),
-                  ),
-                  const SizedBox(width: 6),
-                  _deleteUserStore.loading
-                      ? const CircularProgressIndicator()
-                      : ElevatedButton(
-                          onPressed: () async {
-                            Navigator.of(context).pop();
-                            await _deleteUserStore.run();
-                            if (_deleteUserStore.errorMessage != null) {
-                              EasyLoading.showInfo(
-                                  _deleteUserStore.errorMessage!);
-                            }
-                          },
-                          child: const Text('Sim'),
-                        ),
-                ],
-              )
             ],
           ),
         ),
@@ -140,52 +111,47 @@ class _AccountWidgetState extends State<AccountWidget> {
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
 
-    return Container(
-      decoration: BoxDecoration(
-        border: Border.all(color: context.colors.lightGrey),
-        borderRadius: BorderRadius.circular(4),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(12),
-            child: Text(
-              'Minha conta',
-              style: textTheme.titleMedium!.copyWith(color: Colors.black),
-            ),
-          ),
-          const Divider(),
-          Padding(
-            padding: const EdgeInsets.all(12),
-            child: Observer(
-              builder: (context) {
-                final userMin = Provider.of<AuthStore>(context).userMin;
+    return Observer(
+      builder: (context) {
+        final userMin = Provider.of<AuthStore>(
+          context,
+          listen: false,
+        ).userMin;
 
-                return Column(
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text('Minha conta'),
+            const SizedBox(height: 12),
+            Card(
+              margin: EdgeInsets.zero,
+              child: Padding(
+                padding: const EdgeInsets.all(12),
+                child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    _buildField('Nome: ', userMin?.name ?? ''),
-                    _buildField('Email: ', userMin?.email ?? ''),
-                    const SizedBox(height: 12),
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: OutlinedButton(
-                        onPressed: _deleteAccount,
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: context.colors.error,
-                          side: BorderSide(color: context.colors.error),
-                        ),
-                        child: const Text('EXCLUIR CONTA'),
+                    if (userMin != null) ...[
+                      Text(
+                        'Nome: ${userMin.name}',
+                        overflow: TextOverflow.ellipsis,
                       ),
+                      Text(
+                        'Email: ${userMin.email}',
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ] else
+                      Text('Sem informações', style: textTheme.bodyMedium),
+                    OutlinedButton(
+                      onPressed: _deleteAccountDialog,
+                      child: const Text('Excluir minha conta'),
                     ),
-                  ].separator(const SizedBox(height: 12)).toList(),
-                );
-              },
+                  ].separator(const SizedBox(height: 12)),
+                ),
+              ),
             ),
-          ),
-        ],
-      ),
+          ],
+        );
+      },
     );
   }
 }

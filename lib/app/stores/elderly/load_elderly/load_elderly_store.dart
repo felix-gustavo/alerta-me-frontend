@@ -35,8 +35,6 @@ abstract class LoadElderlyBase with Store {
 
   @action
   Future<void> run() async {
-    print('executando LoadElderly');
-
     try {
       errorMessage = null;
 

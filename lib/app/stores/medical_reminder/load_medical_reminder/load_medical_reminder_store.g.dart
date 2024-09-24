@@ -68,8 +68,8 @@ mixin _$LoadMedicalReminderStore on LoadMedicalReminderStoreBase, Store {
       AsyncAction('LoadMedicalReminderStoreBase.run', context: context);
 
   @override
-  Future<void> run({bool withPast = false}) {
-    return _$runAsyncAction.run(() => super.run(withPast: withPast));
+  Future<void> run({bool isPast = false}) {
+    return _$runAsyncAction.run(() => super.run(isPast: isPast));
   }
 
   late final _$LoadMedicalReminderStoreBaseActionController =

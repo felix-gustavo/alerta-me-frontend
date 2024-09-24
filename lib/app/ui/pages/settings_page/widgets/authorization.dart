@@ -6,7 +6,6 @@ import 'package:provider/provider.dart';
 
 import '../../../../model/authorizations.dart';
 import '../../../../model/users.dart';
-import '../../../../shared/extensions/colors_app_extension.dart';
 import '../../../../shared/extensions/datetime_extension.dart';
 import '../../../../shared/extensions/iterable_extension.dart';
 import '../../../../stores/authorization/autorization/authorization_store.dart';
@@ -22,14 +21,14 @@ import '../../../common_components/my_dialog.dart';
 import '../../../common_components/unordered_list_item.dart';
 import '../../../validators/email_validator.dart';
 
-class AuthorizarionWidget extends StatefulWidget {
-  const AuthorizarionWidget({super.key});
+class AuthorizationWidget extends StatefulWidget {
+  const AuthorizationWidget({super.key});
 
   @override
-  State<AuthorizarionWidget> createState() => _AuthorizarionWidgetState();
+  State<AuthorizationWidget> createState() => _AuthorizationWidgetState();
 }
 
-class _AuthorizarionWidgetState extends State<AuthorizarionWidget> {
+class _AuthorizationWidgetState extends State<AuthorizationWidget> {
   String email = '';
   late final GlobalKey<FormState> _formKey;
   late final CreateAuthorizationStore _createAuthorizationStore;
@@ -120,7 +119,9 @@ class _AuthorizarionWidgetState extends State<AuthorizarionWidget> {
         (_) {
           final elderlyId = _authorizationStore.authorization?.elderly;
           final deleteElderlyId = _deleteElderlyStore.elderlyId;
-          return deleteElderlyId != null && deleteElderlyId == elderlyId;
+          return deleteElderlyId != null &&
+              deleteElderlyId == elderlyId &&
+              _deleteElderlyStore.errorMessage == null;
         },
         () {
           print('_authorizationStore == _deleteElderlyStore');
@@ -146,12 +147,37 @@ class _AuthorizarionWidgetState extends State<AuthorizarionWidget> {
     super.dispose();
   }
 
+  void _submit() async {
+    if (isValid) {
+      _formKey.currentState!.save();
+
+      final authorization = _authorizationStore.authorization;
+
+      await _createAuthorizationStore.run(email: email);
+      if (_createAuthorizationStore.errorMessage != null) {
+        EasyLoading.showInfo(_createAuthorizationStore.errorMessage!);
+      } else if (authorization != null) {
+        await _deleteAuthorizationStore.run();
+        if (_deleteAuthorizationStore.errorMessage != null) {
+          EasyLoading.showInfo(_deleteAuthorizationStore.errorMessage!);
+        }
+      }
+    }
+  }
+
   void _deleteElderly(String elderlyId) {
     showDialog(
       context: context,
-      builder: (context) => MyDialog(
-        confirmPop: false,
+      builder: (context) => MyDialog.confirm(
         title: 'Excluir conta?',
+        loading: _deleteElderlyStore.loading,
+        action: () async {
+          Navigator.of(context).pop();
+          await _deleteElderlyStore.run(id: elderlyId);
+          if (_deleteElderlyStore.errorMessage != null) {
+            EasyLoading.showInfo(_deleteElderlyStore.errorMessage!);
+          }
+        },
         child: SizedBox(
           width: 400,
           child: Column(
@@ -169,27 +195,6 @@ class _AuthorizarionWidgetState extends State<AuthorizarionWidget> {
               const Text(
                 'Caso queira apenas se desvincular da pessoa idosa, sugiro que cancele a autorização',
               ),
-              const SizedBox(height: 27),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  TextButton(
-                    onPressed: () => Navigator.of(context).pop(),
-                    child: const Text('Não'),
-                  ),
-                  const SizedBox(width: 6),
-                  ElevatedButton(
-                    onPressed: () async {
-                      Navigator.of(context).pop();
-                      await _deleteElderlyStore.run(id: elderlyId);
-                      if (_deleteElderlyStore.errorMessage != null) {
-                        EasyLoading.showInfo(_deleteElderlyStore.errorMessage!);
-                      }
-                    },
-                    child: const Text('Sim'),
-                  ),
-                ],
-              )
             ],
           ),
         ),
@@ -197,95 +202,27 @@ class _AuthorizarionWidgetState extends State<AuthorizarionWidget> {
     );
   }
 
-  void _submit() async {
-    if (isValid) {
-      _formKey.currentState!.save();
+  void _deleteAuthorization() {
+    showDialog(
+      context: context,
+      builder: (context) => ConfirmDialog(
+        title: 'Cancelar autorização?',
+        content:
+            'Ao cancelar a autorização, você não poderá gerenciar os lembretes desse usuário',
+        positiveBtnText: 'Sim',
+        negativeBtnText: 'Não',
+        onPostivePressed: () async {
+          final navigator = Navigator.of(context);
+          await _deleteAuthorizationStore.run();
+          if (_deleteAuthorizationStore.errorMessage != null) {
+            EasyLoading.showInfo(
+              _deleteAuthorizationStore.errorMessage!,
+            );
+          }
 
-      final authorization = _authorizationStore.authorization;
-      // final elderly = _loadElderlyStore.elderly;
-
-      await _createAuthorizationStore.run(email: email);
-      if (_createAuthorizationStore.errorMessage != null) {
-        EasyLoading.showInfo(
-          _createAuthorizationStore.errorMessage!,
-        );
-      } else if (authorization != null) {
-        await _deleteAuthorizationStore.run();
-        if (_deleteAuthorizationStore.errorMessage != null) {
-          EasyLoading.showInfo(
-            _deleteAuthorizationStore.errorMessage!,
-          );
-        }
-      }
-    }
-  }
-
-  Widget _buildField(String label, String value) {
-    return Wrap(
-      alignment: WrapAlignment.spaceBetween,
-      spacing: 6,
-      runSpacing: 6,
-      children: [
-        Text(label),
-        Text(value, overflow: TextOverflow.ellipsis),
-      ],
-    );
-  }
-
-  Widget _buildNewAuthorization() {
-    return Observer(
-      builder: (_) {
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            if (_authorizationStore.authorization != null)
-              const Divider(height: 24),
-            Text(
-              'Para registrar o pedido de autorização, digite o email da pessoa idosa',
-              style: Theme.of(context)
-                  .textTheme
-                  .bodyMedium
-                  ?.copyWith(color: context.colors.grey),
-            ),
-            const SizedBox(height: 12),
-            Form(
-              key: _formKey,
-              autovalidateMode: AutovalidateMode.onUserInteraction,
-              child: TextFormField(
-                initialValue: email,
-                decoration: const InputDecoration(
-                  labelText: 'Email',
-                  helperText: '',
-                ),
-                validator: (value) {
-                  final error = EmailValidator().validator(value);
-                  if ((error == null) != isValid) {
-                    WidgetsBinding.instance.addPostFrameCallback((_) {
-                      setState(() => isValid = !isValid);
-                    });
-                  }
-
-                  return error;
-                },
-                onSaved: (newValue) {
-                  if (newValue != null) {
-                    email = newValue;
-                  }
-                },
-              ),
-            ),
-            Align(
-              alignment: Alignment.centerRight,
-              child: _createAuthorizationStore.loading
-                  ? const CircularProgressIndicator()
-                  : ElevatedButton(
-                      onPressed: isValid ? _submit : null,
-                      child: const Text('Registrar pedido'),
-                    ),
-            )
-          ],
-        );
-      },
+          navigator.pop();
+        },
+      ),
     );
   }
 
@@ -293,118 +230,161 @@ class _AuthorizarionWidgetState extends State<AuthorizarionWidget> {
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
 
-    return Container(
-      decoration: BoxDecoration(
-        border: Border.all(color: context.colors.lightGrey),
-        borderRadius: BorderRadius.circular(4),
-      ),
-      child: Observer(
-        builder: (_) {
-          final authorization = _authorizationStore.authorization;
-          List<Widget> fields = [];
+    return Observer(
+      builder: (_) {
+        final authorization = _authorizationStore.authorization;
+        final Users? elderly = _loadElderlyStore.elderly;
 
-          if (authorization != null) {
-            final Users? elderly = _loadElderlyStore.elderly;
-            fields.add(_buildField('Nome: ', elderly?.name ?? ''));
-            fields.add(_buildField('Email: ', elderly?.email ?? ''));
-            fields.add(_buildField('Status: ', authorization.status.name));
-            fields.add(
-              _buildField('Criado em: ', authorization.datetime.toDateBRL),
-            );
-            fields = fields.separator(const SizedBox(height: 12)).toList();
-          }
+        final approved = authorization?.status == AuthorizationStatus.aprovado;
 
-          if (authorization?.status == AuthorizationStatus.aprovado) {
-            fields = [
-              ...fields,
-              const SizedBox(height: 24),
-              Wrap(
-                alignment: WrapAlignment.spaceBetween,
-                crossAxisAlignment: WrapCrossAlignment.center,
-                spacing: 6,
-                runSpacing: 6,
-                children: [
-                  Text(
-                    'Você pode excluir a conta do usuário idoso',
-                    style: textTheme.bodySmall!.copyWith(
-                      color: context.colors.grey,
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text('Autorização'),
+                if (authorization != null)
+                  TextButton(
+                    onPressed: _deleteAuthorization,
+                    style: TextButton.styleFrom(
+                      foregroundColor: Theme.of(context).colorScheme.error,
                     ),
-                  ),
-                  OutlinedButton(
-                    onPressed: () => _deleteElderly(authorization!.elderly),
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: context.colors.error,
-                      side: BorderSide(color: context.colors.error),
-                    ),
-                    child: const Text('EXCLUIR CONTA'),
-                  ),
-                ],
-              ),
-            ];
-          }
-
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(12),
-                child: Wrap(
-                  alignment: WrapAlignment.spaceBetween,
-                  crossAxisAlignment: WrapCrossAlignment.center,
-                  children: [
-                    Text(
-                      'Autorização',
-                      style: textTheme.titleMedium!.copyWith(
-                        color: Colors.black,
-                      ),
-                    ),
-                    if (authorization != null &&
-                        authorization.status == AuthorizationStatus.aguardando)
-                      OutlinedButton(
-                        onPressed: () {
-                          showDialog(
-                            context: context,
-                            builder: (context) => ConfirmDialog(
-                              title: 'Cancelar autorização?',
-                              content:
-                                  'Ao cancelar a autorização, você não poderá gerenciar os lembretes desse usuário',
-                              positiveBtnText: 'Sim',
-                              negativeBtnText: 'Não',
-                              onPostivePressed: () async {
-                                final navigator = Navigator.of(context);
-                                await _deleteAuthorizationStore.run();
-                                if (_deleteAuthorizationStore.errorMessage !=
-                                    null) {
-                                  EasyLoading.showInfo(
-                                    _deleteAuthorizationStore.errorMessage!,
-                                  );
-                                }
-
-                                navigator.pop();
-                              },
-                            ),
-                          );
-                        },
-                        child: const Text('CANCELAR'),
-                      ),
-                  ],
-                ),
-              ),
-              const Divider(),
-              Padding(
+                    child: const Text('Cancelar'),
+                  )
+              ],
+            ),
+            const SizedBox(height: 12),
+            Card(
+              margin: EdgeInsets.zero,
+              child: Padding(
                 padding: const EdgeInsets.all(12),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    ...fields,
-                    if (authorization == null) _buildNewAuthorization(),
-                  ],
+                    if (authorization != null && elderly != null) ...[
+                      Text(
+                        'Nome: ${elderly.name}',
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      Text(
+                        'Email: ${elderly.email}',
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      Text.rich(
+                        TextSpan(
+                          text: 'Status: ',
+                          children: [
+                            WidgetSpan(
+                              alignment: PlaceholderAlignment.middle,
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 6,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: approved
+                                      ? Colors.green[50]
+                                      : Colors.yellow[200],
+                                  borderRadius: BorderRadius.circular(6),
+                                ),
+                                child: Text(
+                                  authorization.status.name,
+                                  style: textTheme.bodyMedium!.copyWith(
+                                    color: approved
+                                        ? Colors.green[800]
+                                        : textTheme.bodyMedium!.decorationColor,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Text(
+                        'Criado em: ${authorization.datetime.toDateBRL}',
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      Text.rich(
+                        TextSpan(
+                          text: 'Permite notificações? ',
+                          children: [
+                            WidgetSpan(
+                              alignment: PlaceholderAlignment.middle,
+                              child: Container(
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 6),
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(6),
+                                ),
+                                child: Text(
+                                  elderly.askUserId != null ? 'sim' : 'não',
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ] else
+                      Container(
+                        constraints: const BoxConstraints(maxWidth: 350),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            if (_authorizationStore.authorization != null)
+                              const Divider(height: 24),
+                            const Text(
+                              'Para registrar o pedido de autorização, digite o email da pessoa idosa',
+                            ),
+                            const SizedBox(height: 21),
+                            Form(
+                              key: _formKey,
+                              autovalidateMode:
+                                  AutovalidateMode.onUserInteraction,
+                              child: TextFormField(
+                                initialValue: email,
+                                decoration: const InputDecoration(
+                                  labelText: 'Email',
+                                  helperText: '',
+                                  border: OutlineInputBorder(),
+                                ),
+                                validator: (value) {
+                                  final error =
+                                      EmailValidator().validator(value);
+                                  if ((error == null) != isValid) {
+                                    WidgetsBinding.instance
+                                        .addPostFrameCallback((_) {
+                                      setState(() => isValid = !isValid);
+                                    });
+                                  }
+
+                                  return error;
+                                },
+                                onSaved: (newValue) {
+                                  if (newValue != null) email = newValue;
+                                },
+                              ),
+                            ),
+                            _createAuthorizationStore.loading
+                                ? const CircularProgressIndicator()
+                                : FilledButton(
+                                    onPressed: isValid ? _submit : null,
+                                    child: const Text('Registrar pedido'),
+                                  ),
+                          ],
+                        ),
+                      ),
+                    if (approved)
+                      OutlinedButton(
+                        onPressed: () => _deleteElderly(authorization!.elderly),
+                        child: const Text('Excluir pessoa idosa'),
+                      ),
+                  ].separator(const SizedBox(height: 12)),
                 ),
               ),
-            ],
-          );
-        },
-      ),
+            ),
+          ],
+        );
+      },
     );
   }
 }

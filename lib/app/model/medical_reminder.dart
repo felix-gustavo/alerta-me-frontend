@@ -7,6 +7,7 @@ class MedicalReminder {
   final String specialty;
   final DateTime dateTime;
   final String address;
+  final bool active;
 
   MedicalReminder({
     this.id,
@@ -14,6 +15,7 @@ class MedicalReminder {
     required this.specialty,
     required this.dateTime,
     required this.address,
+    required this.active,
   });
 
   factory MedicalReminder.empty() {
@@ -23,6 +25,7 @@ class MedicalReminder {
       specialty: '',
       dateTime: DateTime.now(),
       address: '',
+      active: false,
     );
   }
 
@@ -32,6 +35,7 @@ class MedicalReminder {
     String? specialty,
     DateTime? dateTime,
     String? address,
+    bool? active,
   }) {
     return MedicalReminder(
       id: id ?? this.id,
@@ -39,6 +43,7 @@ class MedicalReminder {
       specialty: specialty ?? this.specialty,
       dateTime: dateTime ?? this.dateTime,
       address: address ?? this.address,
+      active: active ?? this.active,
     );
   }
 
@@ -47,23 +52,27 @@ class MedicalReminder {
       'id': id,
       'medic_name': medicName,
       'specialty': specialty,
-      'date': dateTime.toUtcDateTime,
+      'datetime': dateTime.toUtcDateTime,
       'address': address,
+      'active': active,
     };
   }
 
   factory MedicalReminder.fromMap(Map<String, dynamic> map) {
+    final dateTime = (map['datetime'] as String).stringUTCtoDateTime;
+
     return MedicalReminder(
       id: map['id'] as String,
       medicName: map['medic_name'] as String,
       specialty: map['specialty'] as String,
-      dateTime: (map['date'] as String).stringUTCtoDateTime,
+      dateTime: dateTime,
       address: map['address'] as String,
+      active: map['active'] as bool,
     );
   }
 
   @override
   String toString() {
-    return 'MedicalReminder(id: $id, medicName: $medicName, specialty: $specialty, dateTime: $dateTime, address: $address)';
+    return 'MedicalReminder(id: $id, medicName: $medicName, specialty: $specialty, dateTime: $dateTime, address: $address, active: $active)';
   }
 }

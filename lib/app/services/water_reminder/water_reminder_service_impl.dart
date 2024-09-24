@@ -3,7 +3,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import '../../exceptions/exceptions_impl.dart';
 import '../../model/water_reminder.dart';
 
-import '../auth/auth_service.dart';
 import '../http/http_client.dart';
 import 'water_reminder_service.dart';
 
@@ -11,11 +10,9 @@ class WaterReminderServiceImpl implements IWaterReminderService {
   final IHttpClient _httpClient;
   final FirebaseAuth _auth;
 
-  WaterReminderServiceImpl({
-    required IHttpClient httpClient,
-    required IAuthService authService,
-  })  : _auth = FirebaseAuth.instance,
-        _httpClient = httpClient;
+  WaterReminderServiceImpl({required IHttpClient httpClient})
+      : _httpClient = httpClient,
+        _auth = FirebaseAuth.instance;
 
   @override
   Future<WaterReminder?> get() async {

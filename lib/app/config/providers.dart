@@ -7,11 +7,13 @@ import '../services/http/http_client_dio_impl.dart';
 import '../services/medical_reminder/medical_reminder_service_impl.dart';
 import '../services/medication_reminder/medication_reminder_service_impl.dart';
 import '../services/users/users_service_impl.dart';
+import '../services/water_history/water_history_service_impl.dart';
 import '../services/water_reminder/water_reminder_service_impl.dart';
 import '../stores/auth/auth_store.dart';
 import '../stores/authorization/autorization/authorization_store.dart';
 import '../stores/authorization/create_autorization/create_autorization_store.dart';
 import '../stores/authorization/delete_autorization/delete_authorization_store.dart';
+import '../stores/brightness/brightness_store.dart';
 import '../stores/elderly/load_elderly/load_elderly_store.dart';
 import '../stores/medical_reminder/delete_medical_reminder/delete_medical_reminder_store.dart';
 import '../stores/medical_reminder/edit_medical_reminder/edit_medical_reminder_store.dart';
@@ -21,12 +23,27 @@ import '../stores/medication_reminder/edit_medication_reminder/edit_medication_r
 import '../stores/medication_reminder/load_medication_reminder/load_medication_reminder_store.dart';
 import '../stores/user/delete_elderly/delete_elderly_store.dart';
 import '../stores/user/delete_user/delete_user_store.dart';
+import '../stores/water_history/load_older_date_history/load_older_date_history_store.dart';
+import '../stores/water_history/load_water_history/load_water_history_store.dart';
 import '../stores/water_reminder/edit_water_reminder/edit_water_reminder_store.dart';
 import '../stores/water_reminder/load_water_reminder/load_water_reminder_store.dart';
 
 List<SingleChildWidget> getProviders() {
   final userService = UsersServiceImpl(httpClient: HttpClientDioImpl.instance);
   final authService = AuthServiceImpl();
+
+  final authorizationService = AuthorizationServiceImpl(
+    httpClient: HttpClientDioImpl.instance,
+  );
+  final waterReminderService = WaterReminderServiceImpl(
+    httpClient: HttpClientDioImpl.instance,
+  );
+  final medicalReminderService = MedicalReminderServiceImpl(
+    httpClient: HttpClientDioImpl.instance,
+  );
+  final medicationReminderService = MedicationReminderServiceImpl(
+    httpClient: HttpClientDioImpl.instance,
+  );
 
   return [
     Provider<AuthStore>(
@@ -40,16 +57,17 @@ List<SingleChildWidget> getProviders() {
     ),
     Provider<CreateAuthorizationStore>(
       create: (_) => CreateAuthorizationStore(
-        authorizationService: AuthorizationServiceImpl(
-          httpClient: HttpClientDioImpl.instance,
-        ),
+        authorizationService: authorizationService,
       ),
     ),
     Provider<AuthorizationStore>(
       create: (_) => AuthorizationStore(
-        authorizationService: AuthorizationServiceImpl(
-          httpClient: HttpClientDioImpl.instance,
-        ),
+        authorizationService: authorizationService,
+      ),
+    ),
+    Provider<DeleteAuthorizationStore>(
+      create: (_) => DeleteAuthorizationStore(
+        authorizationService: authorizationService,
       ),
     ),
     ProxyProvider<AuthorizationStore, LoadElderlyStore>(
@@ -58,76 +76,62 @@ List<SingleChildWidget> getProviders() {
         service: userService,
       ),
     ),
-    Provider<DeleteAuthorizationStore>(
-      create: (_) => DeleteAuthorizationStore(
-        authorizationService: AuthorizationServiceImpl(
-          httpClient: HttpClientDioImpl.instance,
-        ),
-      ),
-    ),
     Provider<EditWaterReminderStore>(
       create: (_) => EditWaterReminderStore(
-        waterReminderService: WaterReminderServiceImpl(
-          httpClient: HttpClientDioImpl.instance,
-          authService: authService,
-        ),
+        waterReminderService: waterReminderService,
       ),
     ),
     Provider<LoadWaterReminderStore>(
       create: (_) => LoadWaterReminderStore(
-        waterReminderService: WaterReminderServiceImpl(
-          httpClient: HttpClientDioImpl.instance,
-          authService: authService,
-        ),
+        waterReminderService: waterReminderService,
       ),
     ),
     Provider<EditMedicalReminderStore>(
       create: (_) => EditMedicalReminderStore(
-        medicalReminderService: MedicalReminderServiceImpl(
-          httpClient: HttpClientDioImpl.instance,
-          authService: authService,
-        ),
+        medicalReminderService: medicalReminderService,
       ),
     ),
     Provider<DeleteMedicalReminderStore>(
       create: (_) => DeleteMedicalReminderStore(
-        medicalReminderService: MedicalReminderServiceImpl(
-          httpClient: HttpClientDioImpl.instance,
-          authService: authService,
-        ),
+        medicalReminderService: medicalReminderService,
       ),
     ),
     Provider<LoadMedicalReminderStore>(
       create: (_) => LoadMedicalReminderStore(
-        medicalReminderService: MedicalReminderServiceImpl(
-          httpClient: HttpClientDioImpl.instance,
-          authService: authService,
-        ),
+        medicalReminderService: medicalReminderService,
       ),
     ),
     Provider<EditMedicationReminderStore>(
       create: (_) => EditMedicationReminderStore(
-        medicationReminderService: MedicationReminderServiceImpl(
-          httpClient: HttpClientDioImpl.instance,
-          authService: authService,
-        ),
+        medicationReminderService: medicationReminderService,
       ),
     ),
     Provider<DeleteMedicationReminderStore>(
       create: (_) => DeleteMedicationReminderStore(
-        medicationReminderService: MedicationReminderServiceImpl(
-          httpClient: HttpClientDioImpl.instance,
-          authService: authService,
-        ),
+        medicationReminderService: medicationReminderService,
       ),
     ),
     Provider<LoadMedicationReminderStore>(
       create: (_) => LoadMedicationReminderStore(
-        medicationReminderService: MedicationReminderServiceImpl(
+        medicationReminderService: medicationReminderService,
+      ),
+    ),
+    Provider<LoadWaterHistoryStore>(
+      create: (_) => LoadWaterHistoryStore(
+        waterHistoryService: WaterHistoryServiceImpl(
           httpClient: HttpClientDioImpl.instance,
-          authService: authService,
         ),
       ),
     ),
+    Provider<LoadOlderDateHistoryStore>(
+      create: (_) => LoadOlderDateHistoryStore(
+        waterHistoryService: WaterHistoryServiceImpl(
+          httpClient: HttpClientDioImpl.instance,
+        ),
+      ),
+    ),
+    Provider<BrightnessStore>(
+      create: (_) => BrightnessStore()..init(),
+    )
   ];
 }

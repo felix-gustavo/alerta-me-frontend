@@ -5,13 +5,14 @@ import 'package:mobx/mobx.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../../model/medication_reminder.dart';
-import '../../../../../shared/extensions/colors_app_extension.dart';
-import '../../../../../shared/extensions/iterable_extension.dart';
+import '../../../../../shared/extensions/app_styles_extension.dart';
 import '../../../../../shared/extensions/time_of_day_extension.dart';
 import '../../../../../stores/medication_reminder/delete_medication_reminder/delete_medication_reminder_store.dart';
 import '../../../../../stores/medication_reminder/load_medication_reminder/load_medication_reminder_store.dart';
 import '../../../../common_components/confirm_dialog.dart';
 import '../../../../common_components/my_dialog.dart';
+import 'details_content.dart';
+import 'details_content_mobile.dart';
 import 'medication_reminder_edit.dart';
 
 class MedicationReminderDetails extends StatefulWidget {
@@ -30,9 +31,6 @@ class MedicationReminderDetails extends StatefulWidget {
 class _MedicationReminderDetailsState extends State<MedicationReminderDetails> {
   late final DeleteMedicationReminderStore _deleteMedicationReminderStore;
   late final LoadMedicationReminderStore _loadMedicationReminderStore;
-
-  final GlobalKey _rowDosageKey = GlobalKey();
-  double? _maxWidth;
 
   late final ReactionDisposer _disposer;
 
@@ -58,12 +56,6 @@ class _MedicationReminderDetailsState extends State<MedicationReminderDetails> {
         }
       },
     );
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      setState(() {
-        _maxWidth = getSize(_rowDosageKey)?.width;
-      });
-    });
   }
 
   @override
@@ -72,244 +64,31 @@ class _MedicationReminderDetailsState extends State<MedicationReminderDetails> {
     super.dispose();
   }
 
-  Widget _buildContainer({required Widget child}) {
-    return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(6),
-        border: Border.all(color: context.colors.lightGrey),
-      ),
-      clipBehavior: Clip.hardEdge,
-      child: child,
-    );
-  }
-
   Widget _buildCardDosage(Dosage dosage) {
     final textTheme = Theme.of(context).textTheme;
-
-    return _buildContainer(
-      child: SizedBox(
-        width: 96,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 3),
-              child: Text(
-                dosage.time.toHHMM,
-                style: textTheme.bodyMedium!.copyWith(
-                  color: context.colors.primary,
-                ),
-                textAlign: TextAlign.center,
-              ),
-            ),
-            const Divider(),
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 3),
-              child: Text(
-                '${dosage.amount} ${widget.medicationReminder.dosageUnit}',
-                style: textTheme.bodyMedium!.copyWith(
-                  color: context.colors.grey,
-                ),
-                textAlign: TextAlign.center,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildCard() {
-    final textTheme = Theme.of(context).textTheme;
-
-    return _buildContainer(
-      child: IntrinsicWidth(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 6),
-              child: Text(widget.medicationReminder.name,
-                  style: textTheme.titleMedium),
-            ),
-            const Divider(),
-            IntrinsicHeight(
-              child: Row(
-                key: _rowDosageKey,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  ...widget.medicationReminder.dose.entries.map(
-                    (entry) => Row(
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 6),
-                          child: Column(
-                            children: [
-                              Padding(
-                                padding: const EdgeInsets.all(6),
-                                child: Text(
-                                  entry.key.namePtBrShort,
-                                  style: textTheme.bodyMedium!.copyWith(
-                                    color: entry.value?.isNotEmpty ?? false
-                                        ? context.colors.primary
-                                        : context.colors.lightGrey,
-                                  ),
-                                ),
-                              ),
-                              ...entry.value
-                                      ?.map((d) => _buildCardDosage(d))
-                                      .separator(const SizedBox(height: 12))
-                                      .toList() ??
-                                  [
-                                    Text(
-                                      '-',
-                                      style: textTheme.bodyMedium!.copyWith(
-                                        color: context.colors.lightGrey,
-                                      ),
-                                    )
-                                  ],
-                              const SizedBox(height: 12),
-                            ],
-                          ),
-                        ),
-                        if (entry.key.index !=
-                            widget.medicationReminder.dose.length - 1)
-                          VerticalDivider(
-                            color: context.colors.lightGrey.withOpacity(.33),
-                          ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            if (widget.medicationReminder.comments != null &&
-                widget.medicationReminder.comments!.isNotEmpty) ...[
-              const Divider(),
-              SizedBox(
-                width: _maxWidth,
-                child: Padding(
-                  padding: const EdgeInsets.all(12),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Comentários',
-                        style: textTheme.bodyMedium!
-                            .copyWith(color: context.colors.grey),
-                      ),
-                      const SizedBox(height: 9),
-                      Text(
-                        widget.medicationReminder.comments!,
-                        textAlign: TextAlign.justify,
-                      ),
-                    ],
-                  ),
-                ),
-              )
-            ],
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildCardMobile() {
-    final textTheme = Theme.of(context).textTheme;
+    final colorScheme = Theme.of(context).colorScheme;
 
     return Container(
-      margin: const EdgeInsets.symmetric(vertical: 6),
+      margin: const EdgeInsets.all(3),
+      padding: const EdgeInsets.all(6),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(6),
+        border: Border.all(
+          color: Theme.of(context).colorScheme.outlineVariant.withOpacity(.6),
+        ),
+      ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(widget.medicationReminder.name, style: textTheme.bodyLarge),
           Text(
-            'Horários e dosagens',
-            style: textTheme.bodyMedium!.copyWith(color: context.colors.grey),
+            dosage.time.toHHMM,
+            style: textTheme.bodyMedium!.copyWith(color: colorScheme.primary),
           ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: widget.medicationReminder.dose.entries
-                .map((entry) {
-                  final hasDosages = entry.value != null;
-
-                  return _buildContainer(
-                    child: Padding(
-                      padding: const EdgeInsets.all(6),
-                      child: hasDosages
-                          ? Column(
-                              crossAxisAlignment: CrossAxisAlignment.stretch,
-                              children: [
-                                Text(
-                                  entry.key.namePtBr,
-                                  style: textTheme.bodyMedium!.copyWith(
-                                    color: context.colors.primary,
-                                  ),
-                                ),
-                                const SizedBox(height: 9),
-                                SingleChildScrollView(
-                                  scrollDirection: Axis.horizontal,
-                                  padding: const EdgeInsets.all(6),
-                                  child: Row(
-                                    children: entry.value!
-                                        .map((d) => _buildCardDosage(d))
-                                        .separator(const SizedBox(width: 6))
-                                        .toList(),
-                                  ),
-                                )
-                              ],
-                            )
-                          : Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  entry.key.namePtBr,
-                                  style: textTheme.bodyMedium!.copyWith(
-                                    color: context.colors.lightGrey,
-                                  ),
-                                ),
-                                Text(
-                                  'Sem registro',
-                                  style: textTheme.bodySmall!.copyWith(
-                                    color: context.colors.lightGrey,
-                                  ),
-                                ),
-                              ],
-                            ),
-                    ),
-                  );
-                })
-                .separator(const SizedBox(height: 6))
-                .toList(),
+          Text(
+            '${dosage.amount} ${widget.medicationReminder.dosageUnit}',
           ),
-          if (widget.medicationReminder.comments != null &&
-              widget.medicationReminder.comments!.isNotEmpty) ...[
-            Text(
-              'Comentários',
-              style: textTheme.bodyMedium!.copyWith(color: context.colors.grey),
-            ),
-            Text(
-              widget.medicationReminder.comments!,
-              style: textTheme.bodyMedium!.copyWith(
-                color: context.colors.grey,
-              ),
-              textAlign: TextAlign.justify,
-            ),
-          ]
-        ].separator(const SizedBox(height: 12)).toList(),
+        ],
       ),
     );
-  }
-
-  Size? getSize(GlobalKey key) {
-    final context = key.currentContext;
-
-    if (context != null) {
-      final box = context.findRenderObject() as RenderBox;
-      return box.size;
-    }
-    return null;
   }
 
   void _doDelete() async {
@@ -346,7 +125,7 @@ class _MedicationReminderDetailsState extends State<MedicationReminderDetails> {
       builder: (_) => MyDialog(
         title: 'Edição de Lembrete de Medicamento',
         child: SizedBox(
-          width: 549,
+          width: 600,
           child: MedicationReminderEditWidget(
             medicationReminder: widget.medicationReminder,
           ),
@@ -357,46 +136,43 @@ class _MedicationReminderDetailsState extends State<MedicationReminderDetails> {
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final overflowed = (_maxWidth ?? 0) + 3 > constraints.maxWidth;
-        final textTheme = Theme.of(context).textTheme;
-
-        return Observer(
-          builder: (_) {
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                overflowed ? _buildCardMobile() : _buildCard(),
-                const SizedBox(height: 12),
-                _deleteMedicationReminderStore.loading
-                    ? const CircularProgressIndicator()
-                    : Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          TextButton(
-                            onPressed: _doDelete,
-                            child: Text(
-                              'Excluir',
-                              style: textTheme.bodyMedium!.copyWith(
-                                color: context.colors.primary,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 15),
-                          ElevatedButton(
-                            onPressed: _goEditPage,
-                            child: Text(
-                              'Editar',
-                              style: textTheme.bodyMedium!
-                                  .copyWith(color: Colors.white),
-                            ),
-                          ),
-                        ],
-                      )
-              ],
-            );
-          },
+    return Observer(
+      builder: (_) {
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            context.isMobile
+                ? DetailsContentMobile(
+                    medicationReminder: widget.medicationReminder,
+                    buildCardDosage: _buildCardDosage,
+                  )
+                : DetailsContent(
+                    medicationReminder: widget.medicationReminder,
+                    buildCardDosage: _buildCardDosage,
+                  ),
+            const SizedBox(height: 21),
+            _deleteMedicationReminderStore.loading
+                ? const CircularProgressIndicator()
+                : Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    // mainAxisSize: MainAxisSize.min,
+                    children: [
+                      TextButton.icon(
+                        onPressed: _doDelete,
+                        style: TextButton.styleFrom(
+                          foregroundColor: Theme.of(context).colorScheme.error,
+                        ),
+                        label: const Text('Excluir'),
+                        icon: const Icon(Icons.delete),
+                      ),
+                      const SizedBox(width: 15),
+                      TextButton(
+                        onPressed: _goEditPage,
+                        child: const Text('Editar'),
+                      ),
+                    ],
+                  )
+          ],
         );
       },
     );

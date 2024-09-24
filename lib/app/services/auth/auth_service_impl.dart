@@ -5,12 +5,8 @@ import 'auth_service.dart';
 
 class AuthServiceImpl implements IAuthService {
   final FirebaseAuth _auth;
-  // final IHttpClient _httpClient;
 
-  AuthServiceImpl()
-      :
-        // _httpClient = HttpClientDioImpl.instance,
-        _auth = FirebaseAuth.instance;
+  AuthServiceImpl() : _auth = FirebaseAuth.instance;
 
   @override
   UserMin? getAuthUser() {
@@ -33,12 +29,10 @@ class AuthServiceImpl implements IAuthService {
         final idToken = await user.getIdToken();
 
         if (idToken != null) {
-          // final response = await _httpClient.post(
-          //   '/auth/sign-in',
-          //   data: {'idToken': idToken},
-          // );
-
-          return UserMin(name: user.displayName ?? '', email: user.email ?? '');
+          return UserMin(
+            name: user.displayName ?? '',
+            email: user.email ?? '',
+          );
         }
       }
     } on FirebaseException catch (error) {

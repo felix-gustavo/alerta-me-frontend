@@ -29,11 +29,11 @@ abstract class LoadMedicalReminderStoreBase with Store {
   bool get loading => _future.status == FutureStatus.pending;
 
   @action
-  Future<void> run({bool withPast = false}) async {
+  Future<void> run({bool isPast = false}) async {
     try {
       errorMessage = null;
 
-      _future = ObservableFuture(_service.get(withPast: withPast));
+      _future = ObservableFuture(_service.get(isPast: isPast));
       medicalReminders = await _future;
     } on IBaseException catch (e) {
       errorMessage = e.message;

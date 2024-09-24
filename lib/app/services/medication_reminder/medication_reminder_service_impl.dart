@@ -3,7 +3,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import '../../exceptions/exceptions_impl.dart';
 import '../../model/medication_reminder.dart';
 
-import '../auth/auth_service.dart';
 import '../http/http_client.dart';
 import 'medication_reminder_service.dart';
 
@@ -11,10 +10,8 @@ class MedicationReminderServiceImpl implements IMedicationReminderService {
   final IHttpClient _httpClient;
   final FirebaseAuth _auth;
 
-  MedicationReminderServiceImpl({
-    required IHttpClient httpClient,
-    required IAuthService authService,
-  })  : _httpClient = httpClient,
+  MedicationReminderServiceImpl({required IHttpClient httpClient})
+      : _httpClient = httpClient,
         _auth = FirebaseAuth.instance;
 
   @override

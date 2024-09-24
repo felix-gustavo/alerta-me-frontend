@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 
-import '../shared/extensions/colors_app_extension.dart';
+import '../shared/constants.dart';
 
 class EasyLoadingConfig {
   static void setup() {
@@ -11,10 +11,10 @@ class EasyLoadingConfig {
       ..displayDuration = const Duration(seconds: 2)
       ..loadingStyle = EasyLoadingStyle.custom
       ..radius = 6
-      ..progressColor = ColorsApp.i.primary
+      ..progressColor = Constants.primaryColor
       ..backgroundColor = Colors.white
-      ..indicatorColor = ColorsApp.i.primary
-      ..textColor = ColorsApp.i.primary
+      ..indicatorColor = Constants.primaryColor
+      ..textColor = Constants.primaryColor
       ..userInteractions = false
       ..dismissOnTap = false;
   }

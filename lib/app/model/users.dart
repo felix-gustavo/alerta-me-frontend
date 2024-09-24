@@ -4,11 +4,13 @@ class Users {
   final String id;
   final String name;
   final String email;
+  final String? askUserId;
 
   Users({
     required this.id,
     required this.name,
     required this.email,
+    this.askUserId,
   });
 
   Map<String, dynamic> toMap() {
@@ -16,6 +18,7 @@ class Users {
       'id': id,
       'name': name,
       'email': email,
+      'ask_user_id': askUserId,
     };
   }
 
@@ -24,6 +27,7 @@ class Users {
       id: map['id'] as String,
       name: map['name'] as String,
       email: map['email'] as String,
+      askUserId: map['ask_user_id'],
     );
   }
 

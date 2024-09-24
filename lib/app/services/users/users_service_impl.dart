@@ -50,9 +50,8 @@ class UsersServiceImpl implements IUsersService {
     required String accessToken,
   }) async {
     final response = await _httpClient.delete(
-      '/users/elderly',
+      '/users/elderly/$id',
       token: accessToken,
-      data: {'id': id},
     );
 
     if (response.statusCode == 200) return response.data['id'];

@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../shared/extensions/colors_app_extension.dart';
-
 class ConfirmDialog extends StatelessWidget {
   final String title;
   final String? content;
@@ -36,17 +34,19 @@ class ConfirmDialog extends StatelessWidget {
 
     return AlertDialog(
       title: Text(title, style: textTheme.titleMedium),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       titlePadding: const EdgeInsets.all(21),
       contentPadding: const EdgeInsets.symmetric(horizontal: 21),
       actionsPadding: const EdgeInsets.fromLTRB(21, 33, 15, 21),
       buttonPadding: const EdgeInsets.symmetric(horizontal: 12),
       content: content != null && content!.isNotEmpty
-          ? Text(
-              content!,
-              style: textTheme.bodyMedium!.copyWith(
-                color: context.colors.grey,
-                fontStyle: FontStyle.italic,
+          ? SizedBox(
+              width: 333,
+              child: Text(
+                content!,
+                style: textTheme.bodyMedium!.copyWith(
+                  // color: context.colors.grey,
+                  fontStyle: FontStyle.italic,
+                ),
               ),
             )
           : null,
@@ -58,7 +58,7 @@ class ConfirmDialog extends StatelessWidget {
           },
           child: Text(negativeBtnText),
         ),
-        ElevatedButton(
+        TextButton(
           onPressed: onPostivePressed,
           child: Text(positiveBtnText),
         ),

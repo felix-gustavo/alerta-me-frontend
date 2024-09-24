@@ -12,7 +12,7 @@ class WaterReminder {
   final int interval;
   final int amount;
   final bool active;
-  final List<TimeOfDay>? reminders;
+  final List<TimeOfDay> reminders;
 
   WaterReminder({
     required this.start,
@@ -20,7 +20,7 @@ class WaterReminder {
     required this.interval,
     required this.amount,
     required this.active,
-    this.reminders,
+    required this.reminders,
   });
 
   factory WaterReminder.empty() {
@@ -41,7 +41,7 @@ class WaterReminder {
       'interval': interval,
       'amount': amount,
       'active': active,
-      'reminders': reminders?.map((e) => e.toHHMM).toList()
+      'reminders': reminders.map((e) => e.toHHMM).toList()
     };
   }
 

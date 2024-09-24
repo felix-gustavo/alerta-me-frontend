@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../shared/extensions/colors_app_extension.dart';
-
 class LabeledCheckbox extends StatelessWidget {
   final String label;
   final bool value;
@@ -16,21 +14,18 @@ class LabeledCheckbox extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListTile(
-      onTap: () => onChanged(!value),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      minLeadingWidth: 6,
-      title: Text(
-        label,
-        style: Theme.of(context)
-            .textTheme
-            .bodyMedium!
-            .copyWith(color: context.colors.grey),
-      ),
-      leading: Icon(
-        value ? Icons.check_box : Icons.check_box_outline_blank,
-        color: value ? context.colors.secondary : context.colors.grey,
-        size: 21,
+    return IntrinsicWidth(
+      child: ListTile(
+        onTap: () => onChanged(!value),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(9)),
+        minLeadingWidth: 6,
+        visualDensity: VisualDensity.compact,
+        title: Text(label),
+        leading: Icon(
+          value ? Icons.check_box : Icons.check_box_outline_blank,
+          color: value ? Theme.of(context).colorScheme.secondary : null,
+          size: 21,
+        ),
       ),
     );
   }

@@ -1,16 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:time_range_picker/time_range_picker.dart';
-
-import '../../shared/extensions/colors_app_extension.dart';
+import '../../shared/extensions/app_styles_extension.dart';
 import '../../shared/extensions/time_of_day_extension.dart';
+import 'my_container.dart';
 
 class MyTimeRangePicker extends StatefulWidget {
   final TimeOfDay start;
   final TimeOfDay end;
-  final double width;
-  final bool rangeTextSmall;
-  final double padding;
-  final bool hideTimes;
   final bool readonly;
 
   final void Function(TimeOfDay start)? onStartChange;
@@ -20,27 +16,19 @@ class MyTimeRangePicker extends StatefulWidget {
     Key? key,
     required this.start,
     required this.end,
-    this.width = 271,
-    this.rangeTextSmall = false,
-    this.padding = 33,
-    this.hideTimes = false,
     this.onStartChange,
     this.onEndChange,
-    this.readonly = false,
-  }) : super(key: key);
+  })  : readonly = false,
+        super(key: key);
 
-  const MyTimeRangePicker.small({
+  const MyTimeRangePicker.readonly({
     Key? key,
     required this.start,
     required this.end,
-    this.width = 183,
-    this.rangeTextSmall = true,
-    this.padding = 18,
-    this.hideTimes = true,
     this.onStartChange,
     this.onEndChange,
-    this.readonly = false,
-  }) : super(key: key);
+  })  : readonly = true,
+        super(key: key);
 
   @override
   State<MyTimeRangePicker> createState() => _MyTimeRangePickerState();
@@ -60,82 +48,85 @@ class _MyTimeRangePickerState extends State<MyTimeRangePicker> {
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
+    final colorScheme = Theme.of(context).colorScheme;
 
     return IgnorePointer(
       ignoring: widget.readonly,
-      child: IntrinsicWidth(
-        child: Container(
-          decoration: !widget.hideTimes
-              ? BoxDecoration(
-                  border: Border.all(color: context.colors.lightGrey),
-                  borderRadius: const BorderRadius.all(Radius.circular(6)),
-                )
-              : null,
+      child: SizedBox(
+        width: context.isTablet ? 222 : 270,
+        child: MyContainer(
+          padding: EdgeInsets.zero,
           child: Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
-              if (!widget.hideTimes)
-                Container(
-                  decoration: BoxDecoration(
-                    color: context.colors.primaryLight,
-                    borderRadius: const BorderRadius.only(
-                      topLeft: Radius.circular(6),
-                      topRight: Radius.circular(6),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    Column(
+                      children: [
+                        Text(
+                          'Início',
+                          style: textTheme.bodyMedium!.copyWith(
+                            color: colorScheme.outline,
+                          ),
+                        ),
+                        Text(_start.toHHMM, style: textTheme.titleLarge),
+                      ],
                     ),
-                  ),
-                  padding: EdgeInsets.symmetric(vertical: widget.padding / 2),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      Column(
-                        children: [
-                          Text(
-                            'Início',
-                            style: textTheme.titleMedium!
-                                .copyWith(color: context.colors.primary),
+                    Column(
+                      children: [
+                        Text(
+                          'Fim',
+                          style: textTheme.bodyMedium!.copyWith(
+                            color: colorScheme.outline,
                           ),
-                          Text(
-                            _start.toHHMM,
-                            style: textTheme.headlineSmall!
-                                .copyWith(color: context.colors.primary),
-                          ),
-                        ],
-                      ),
-                      Column(
-                        children: [
-                          Text(
-                            'Fim',
-                            style: textTheme.titleMedium!
-                                .copyWith(color: context.colors.primary),
-                          ),
-                          Text(
-                            _end.toHHMM,
-                            style: textTheme.headlineSmall!
-                                .copyWith(color: context.colors.primary),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
+                        ),
+                        Text(_end.toHHMM, style: textTheme.titleLarge),
+                      ],
+                    ),
+                  ],
                 ),
-              SizedBox(
-                width: widget.width,
-                height: widget.width,
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 18),
                 child: TimeRangePicker(
-                  padding: widget.padding,
+                  paintingStyle: PaintingStyle.stroke,
+                  padding: 24,
                   hideButtons: true,
+                  strokeWidth: widget.readonly ? 24 : 9,
+                  handlerRadius: widget.readonly ? 0 : 9,
+                  ticks: 8,
+                  backgroundColor:
+                      Theme.of(context).colorScheme.primaryContainer,
                   backgroundWidget: Column(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       Text(
                         'Ativo por',
-                        style: textTheme.bodySmall!
-                            .copyWith(color: context.colors.grey),
+                        style: textTheme.bodyMedium!.copyWith(
+                          color: colorScheme.outline,
+                        ),
                       ),
-                      Text(
-                        _start.interval(_end).toHHMM,
-                        style: widget.rangeTextSmall
-                            ? textTheme.headlineMedium
-                            : textTheme.displaySmall,
+                      Text.rich(
+                        TextSpan(
+                          children: [
+                            TextSpan(
+                              text: _start.interval(_end).toHHMM,
+                              style: textTheme.headlineSmall!.copyWith(
+                                color: colorScheme.primary,
+                              ),
+                            ),
+                            TextSpan(
+                              text: 'H',
+                              style: textTheme.titleLarge!.copyWith(
+                                color: colorScheme.primary,
+                              ),
+                            )
+                          ],
+                        ),
+                        textAlign: TextAlign.center,
                       ),
                     ],
                   ),
@@ -152,6 +143,41 @@ class _MyTimeRangePickerState extends State<MyTimeRangePicker> {
                   },
                 ),
               ),
+              // if (widget.readonly) ...[
+              //   const Divider(height: 24),
+              //   Column(
+              //     children: [
+              //       Text(
+              //         'Ativo por',
+              //         style: textTheme.bodyMedium!.copyWith(
+              //           color: colorScheme.outline,
+              //         ),
+              //       ),
+              //       const SizedBox(height: 3),
+              //       Text.rich(
+              //         TextSpan(
+              //           children: [
+              //             TextSpan(
+              //               text: _start.interval(_end).toHHMM,
+              //               style: textTheme.headlineSmall!.copyWith(
+              //                 color: colorScheme.primary,
+              //               ),
+              //             ),
+              //             TextSpan(
+              //               text: 'H',
+              //               // style: textTheme.titleLarge!,
+              //               style: textTheme.titleLarge!.copyWith(
+              //                 color: colorScheme.primary,
+              //               ),
+              //             )
+              //           ],
+              //         ),
+              //         textAlign: TextAlign.center,
+              //       ),
+              //       const SizedBox(height: 12),
+              //     ],
+              //   ),
+              // ]
             ],
           ),
         ),

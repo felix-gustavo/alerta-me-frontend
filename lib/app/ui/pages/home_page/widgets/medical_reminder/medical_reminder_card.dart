@@ -2,20 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../../model/medical_reminder.dart';
-import '../../../../../shared/extensions/colors_app_extension.dart';
 import '../../../../../shared/extensions/iterable_extension.dart';
 import '../../../../../shared/extensions/string_extension.dart';
 
 class MedicalReminderCard extends StatefulWidget {
   final MedicalReminder medicalReminder;
   final bool isHover;
-  final bool expanded;
+  final bool details;
 
   const MedicalReminderCard({
     Key? key,
     required this.medicalReminder,
     this.isHover = false,
-    this.expanded = false,
+    this.details = true,
   }) : super(key: key);
 
   @override
@@ -26,104 +25,94 @@ class _MedicalReminderCardState extends State<MedicalReminderCard> {
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
-
     final date = widget.medicalReminder.dateTime.toLocal();
 
-    final child = Padding(
-      padding: const EdgeInsets.all(12),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                widget.medicalReminder.medicName,
-                style: textTheme.bodyLarge,
-                textAlign: TextAlign.justify,
-                overflow: widget.expanded ? null : TextOverflow.ellipsis,
-              ),
-              const SizedBox(height: 3),
-              Text(
-                widget.medicalReminder.specialty,
-                style: textTheme.bodyMedium!.copyWith(
-                  color: context.colors.grey,
-                ),
-                textAlign: TextAlign.justify,
-                overflow: widget.expanded ? null : TextOverflow.ellipsis,
-              ),
-            ],
-          ),
-          Wrap(
-            spacing: 15,
-            alignment: WrapAlignment.spaceBetween,
-            children: [
-              IntrinsicWidth(
-                child: Row(
-                  children: [
-                    Icon(
-                      Icons.calendar_month,
-                      color: context.colors.primary,
-                    ),
-                    const SizedBox(width: 3),
-                    Text(
-                      DateFormat("d 'de' MMMM 'de' yyyy", 'pt_BR')
-                          .format(date)
-                          .capitalize,
-                      style: textTheme.bodyMedium!.copyWith(
-                        color: context.colors.primaryDark,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              IntrinsicWidth(
-                child: Row(
-                  children: [
-                    Icon(
-                      Icons.access_time,
-                      color: context.colors.primary,
-                    ),
-                    const SizedBox(width: 3),
-                    Text(
-                      DateFormat.Hm('pt_BR').format(date).capitalize,
-                      style: textTheme.bodyMedium!.copyWith(
-                        color: context.colors.primaryDark,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          Text(
-            widget.medicalReminder.address,
-            style: textTheme.bodyMedium!.copyWith(
-              color: context.colors.grey,
-            ),
-            textAlign: TextAlign.justify,
-            overflow: widget.expanded ? null : TextOverflow.ellipsis,
-          ),
-        ].separator(const SizedBox(height: 15)).toList(),
-      ),
-    );
-
-    return Container(
+    return ConstrainedBox(
       constraints: BoxConstraints(
-        minWidth: 327,
-        maxWidth: widget.expanded ? 418 : 327,
+        minWidth: 315,
+        maxWidth: widget.details ? 426 : 315,
       ),
-      clipBehavior: Clip.antiAlias,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        border: Border.all(
-          color: widget.isHover
-              ? context.colors.primary.withOpacity(.46)
-              : context.colors.lightGrey,
+      child: AnimatedScale(
+        scale: widget.isHover ? 1.03 : 1.0,
+        duration: const Duration(milliseconds: 99),
+        child: Card(
+          margin: EdgeInsets.zero,
+          // shadowColor: widget.isHover ? context.colors.primary : null,
+          child: Padding(
+            padding: const EdgeInsets.all(12),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      widget.medicalReminder.medicName,
+                      style: textTheme.bodyMedium!.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                      textAlign: TextAlign.justify,
+                      overflow: widget.details ? null : TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 3),
+                    Text(
+                      widget.medicalReminder.specialty,
+                      style: textTheme.bodyMedium!.copyWith(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                      textAlign: TextAlign.justify,
+                      overflow: widget.details ? null : TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
+                Wrap(
+                  spacing: 15,
+                  alignment: WrapAlignment.spaceBetween,
+                  children: [
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.calendar_month),
+                        const SizedBox(width: 3),
+                        Text(
+                          DateFormat("d 'de' MMMM 'de' yyyy", 'pt_BR')
+                              .format(date)
+                              .capitalize,
+                        ),
+                      ],
+                    ),
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Tooltip(
+                          message: widget.medicalReminder.active
+                              ? 'Ativo'
+                              : 'Desativado',
+                          child: Icon(
+                            widget.medicalReminder.active
+                                ? Icons.alarm_on_outlined
+                                : Icons.alarm_off_outlined,
+                          ),
+                        ),
+                        const SizedBox(width: 3),
+                        Text(DateFormat.Hm('pt_BR').format(date).capitalize),
+                      ],
+                    ),
+                  ],
+                ),
+                Text(
+                  widget.medicalReminder.address,
+                  style: textTheme.bodyMedium!.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                  textAlign: TextAlign.justify,
+                  overflow: widget.details ? null : TextOverflow.ellipsis,
+                ),
+              ].separator(const SizedBox(height: 24)),
+            ),
+          ),
         ),
-        borderRadius: BorderRadius.circular(6),
       ),
-      child: child,
     );
   }
 }

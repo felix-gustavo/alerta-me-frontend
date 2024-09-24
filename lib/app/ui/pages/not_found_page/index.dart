@@ -1,14 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-class NotFoundPage extends StatefulWidget {
+class NotFoundPage extends StatelessWidget {
   const NotFoundPage({super.key});
 
-  @override
-  State<NotFoundPage> createState() => _NotFoundPageState();
-}
-
-class _NotFoundPageState extends State<NotFoundPage> {
   @override
   Widget build(BuildContext context) {
     return Center(
@@ -25,7 +20,7 @@ class _NotFoundPageState extends State<NotFoundPage> {
             style: Theme.of(context).textTheme.bodyLarge,
           ),
           const SizedBox(height: 33),
-          ElevatedButton(
+          FilledButton(
             onPressed: () => context.go('/home'),
             child: const Text('VOLTAR AO INÍCIO'),
           ),
