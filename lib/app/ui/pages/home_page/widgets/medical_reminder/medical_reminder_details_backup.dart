@@ -16,8 +16,7 @@ import 'preview_card_edit.dart';
 class MedicalReminderDetails extends StatefulWidget {
   final MedicalReminder medicalReminder;
 
-  const MedicalReminderDetails({Key? key, required this.medicalReminder})
-      : super(key: key);
+  const MedicalReminderDetails({super.key, required this.medicalReminder});
 
   @override
   State<MedicalReminderDetails> createState() => _MedicalReminderDetailsState();

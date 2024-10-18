@@ -16,7 +16,7 @@ import 'widgets/medication_reminder/index.dart';
 import 'widgets/water_reminder/index.dart';
 
 class HomePage extends StatefulWidget {
-  const HomePage({Key? key}) : super(key: key);
+  const HomePage({super.key});
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -70,8 +70,6 @@ class _HomePageState extends State<HomePage>
           _authorizationStore.authorization?.status ==
           AuthorizationStatus.aprovado,
       () async {
-        print(
-            '_authorizationStore.authorization?.status == AuthorizationStatus.aprovado');
         await Future.wait(
           [
             _loadWaterReminderStore.run(),
@@ -90,7 +88,7 @@ class _HomePageState extends State<HomePage>
     super.dispose();
   }
 
-  List<Widget> getChildren(bool toBreak) => [
+  List<Widget> _getChildren(bool toBreak) => [
         MedicationReminderWidget(toBreak),
         MedicalReminderWidget(toBreak),
       ];
@@ -117,14 +115,13 @@ class _HomePageState extends State<HomePage>
               SizedBox(
                 height: 321,
                 child: Row(
-                  // crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: getChildren(false)
+                  children: _getChildren(false)
                       .map((e) => Flexible(child: e))
                       .separator(const SizedBox(width: 18)),
                 ),
               )
             ] else
-              ...getChildren(true),
+              ..._getChildren(true),
           ].separator(const SizedBox(height: 12)),
         ),
       ),

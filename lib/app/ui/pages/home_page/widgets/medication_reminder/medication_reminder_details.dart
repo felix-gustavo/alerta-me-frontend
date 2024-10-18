@@ -19,9 +19,9 @@ class MedicationReminderDetails extends StatefulWidget {
   final MedicationReminder medicationReminder;
 
   const MedicationReminderDetails({
-    Key? key,
+    super.key,
     required this.medicationReminder,
-  }) : super(key: key);
+  });
 
   @override
   State<MedicationReminderDetails> createState() =>
@@ -155,7 +155,6 @@ class _MedicationReminderDetailsState extends State<MedicationReminderDetails> {
                 ? const CircularProgressIndicator()
                 : Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    // mainAxisSize: MainAxisSize.min,
                     children: [
                       TextButton.icon(
                         onPressed: _doDelete,

@@ -1,4 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
 
 import '../../model/user_min.dart';
 import 'auth_service.dart';
@@ -36,7 +37,7 @@ class AuthServiceImpl implements IAuthService {
         }
       }
     } on FirebaseException catch (error) {
-      print('error, $error');
+      debugPrint('error, $error');
     }
     return null;
   }

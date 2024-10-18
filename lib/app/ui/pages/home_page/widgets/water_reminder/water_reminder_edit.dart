@@ -89,7 +89,6 @@ class _WaterReminderEditWidgetState extends State<WaterReminderEditWidget> {
               ),
               icon: const Icon(
                 Icons.warning_amber_rounded,
-                // color: Theme.of(context).colorScheme.error,
                 size: 45,
               ),
             ),

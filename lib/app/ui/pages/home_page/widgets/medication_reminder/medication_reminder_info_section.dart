@@ -11,12 +11,12 @@ class MedicationReminderInfoSection extends StatefulWidget {
   final TextEditingController commentsControl;
 
   const MedicationReminderInfoSection({
-    Key? key,
+    super.key,
     required this.dosageUnitControl,
     required this.dosagePronunciationControl,
     required this.medicationNameControl,
     required this.commentsControl,
-  }) : super(key: key);
+  });
 
   @override
   State<MedicationReminderInfoSection> createState() =>
@@ -27,7 +27,6 @@ class _MedicationReminderInfoSectionState
     extends State<MedicationReminderInfoSection> {
   @override
   Widget build(BuildContext context) {
-    print('MedicationReminderInfoSection');
     final unityFields = [
       Column(
         crossAxisAlignment: CrossAxisAlignment.start,

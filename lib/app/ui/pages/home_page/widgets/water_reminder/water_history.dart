@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:mobx/mobx.dart';
 import 'package:provider/provider.dart';
+import 'package:skeletonizer/skeletonizer.dart';
 
 import '../../../../../model/water_history.dart' as model;
 import '../../../../../shared/extensions/app_styles_extension.dart';
@@ -76,11 +77,20 @@ class _WaterHistoryState extends State<WaterHistory> {
       color: suggestedColor,
     );
 
-    final maxY = waterHistory
-            .reduce(
-              (a, b) => a.suggestedAmount > b.suggestedAmount ? a : b,
-            )
-            .suggestedAmount
+    final maxSuggestedAmount = waterHistory
+        .reduce(
+          (a, b) => a.suggestedAmount > b.suggestedAmount ? a : b,
+        )
+        .suggestedAmount;
+    final maxAmount = waterHistory
+        .reduce(
+          (a, b) => (a.amount ?? 0) > (b.amount ?? 0) ? a : b,
+        )
+        .amount;
+
+    final maxY = (maxSuggestedAmount > (maxAmount ?? 0)
+                ? maxSuggestedAmount
+                : (maxAmount ?? 0))
             .toDouble() *
         1.2;
 
@@ -90,141 +100,109 @@ class _WaterHistoryState extends State<WaterHistory> {
     final duration = last - first;
     final intervalTimes = duration / 3;
 
-    return Padding(
-      padding: const EdgeInsets.only(right: 18),
-      child: LineChart(
-        LineChartData(
-          gridData: const FlGridData(
-            drawVerticalLine: false,
-            drawHorizontalLine: true,
-          ),
-          borderData: FlBorderData(
-            show: true,
-            border: Border(
-              left: BorderSide(
-                color: Theme.of(context).colorScheme.surfaceContainerHighest,
-              ),
-              bottom: BorderSide(
-                color: Theme.of(context).colorScheme.surfaceContainerHighest,
-              ),
-            ),
-          ),
-          minY: 0,
-          maxY: maxY,
-          titlesData: FlTitlesData(
-            topTitles: const AxisTitles(sideTitles: SideTitles()),
-            rightTitles: const AxisTitles(sideTitles: SideTitles()),
-            leftTitles: AxisTitles(
-              // axisNameWidget: const Text('mL'),
-              sideTitles: SideTitles(
-                showTitles: true,
-                reservedSize: 63,
-                getTitlesWidget: (value, meta) {
-                  if (meta.axisPosition == 0) return SizedBox.fromSize();
-                  return SideTitleWidget(
-                    axisSide: meta.axisSide,
-                    fitInside: SideTitleFitInsideData.fromTitleMeta(meta),
-                    child: Text(
-                      '${value.toString()} mL',
-                      style: Theme.of(context).textTheme.bodySmall,
-                      textAlign: TextAlign.center,
-                    ),
-                  );
-                },
-              ),
-            ),
-            bottomTitles: AxisTitles(
-              drawBelowEverything: false,
-              sideTitles: SideTitles(
-                showTitles: true,
-                interval: waterHistory.length > 1 ? intervalTimes : null,
-                getTitlesWidget: (value, meta) {
-                  // if (meta.axisPosition == 0) return SizedBox.fromSize();
-                  return Padding(
-                    padding: const EdgeInsets.only(top: 6),
-                    child: Text(
-                      DateTime.fromMillisecondsSinceEpoch(value.toInt()).toTime,
-                      style: Theme.of(context).textTheme.bodySmall,
-                    ),
-                  );
-                },
-              ),
-            ),
-          ),
-          lineTouchData: LineTouchData(
-            // handleBuiltInTouches: false,
-            touchSpotThreshold: 21,
-            // getTouchedSpotIndicator: (barData, spotIndexes) => spotIndexes.map(
-            //   (spotIndex) {
-            //     return const TouchedSpotIndicatorData(
-            //       FlLine(color: Colors.transparent),
-            //       FlDotData(),
-            //     );
-            //   },
-            // ).toList(),
-            touchTooltipData: LineTouchTooltipData(
-              fitInsideHorizontally: true,
-              fitInsideVertically: true,
-              tooltipHorizontalAlignment: FLHorizontalAlignment.right,
-              tooltipRoundedRadius: 6,
-              // tooltipBorder: BorderSide(color: context.colors.primary),
-              getTooltipColor: (_) =>
-                  Theme.of(context).colorScheme.primaryContainer,
-              tooltipMargin: 12,
-              tooltipPadding: const EdgeInsets.symmetric(
-                horizontal: 9,
-                vertical: 3,
-              ),
-              getTooltipItems: (touchedSpots) {
-                return [
-                  ...touchedSpots.map(
-                    (barSpot) {
-                      final flSpot = barSpot;
-                      if (flSpot.x == 0) return null;
+    final colorScheme = Theme.of(context).colorScheme;
 
-                      return LineTooltipItem(
-                        '${flSpot.y.toString()} mL',
-                        TextStyle(
-                          color: Theme.of(context).colorScheme.onSecondary,
-                        ),
-                      );
-                    },
-                  )
-                ];
+    return LineChart(
+      LineChartData(
+        gridData: const FlGridData(
+          drawVerticalLine: false,
+          drawHorizontalLine: true,
+        ),
+        borderData: FlBorderData(
+          show: true,
+          border: Border(
+            left: BorderSide(color: colorScheme.surfaceContainerHighest),
+            bottom: BorderSide(color: colorScheme.surfaceContainerHighest),
+          ),
+        ),
+        minY: 0,
+        maxY: maxY,
+        titlesData: FlTitlesData(
+          topTitles: const AxisTitles(sideTitles: SideTitles()),
+          rightTitles: const AxisTitles(sideTitles: SideTitles()),
+          leftTitles: AxisTitles(
+            sideTitles: SideTitles(
+              showTitles: true,
+              reservedSize: 63,
+              getTitlesWidget: (value, meta) {
+                if (meta.axisPosition == 0) return SizedBox.fromSize();
+                return SideTitleWidget(
+                  axisSide: meta.axisSide,
+                  fitInside: SideTitleFitInsideData.fromTitleMeta(meta),
+                  child: Text(
+                    '${value.toString()} mL',
+                    style: Theme.of(context).textTheme.bodySmall,
+                    textAlign: TextAlign.center,
+                  ),
+                );
               },
             ),
           ),
-          showingTooltipIndicators: [
-            ...showingTooltipOnSpots.map((index) {
-              return ShowingTooltipIndicators([
-                LineBarSpot(
-                  lineBarData,
-                  0,
-                  lineBarData.spots[index],
-                ),
-              ]);
-            })
-          ],
-          lineBarsData: [
-            // LineChartBarData(
-            //   spots: _suggestedAmountToFlSpots(waterHistory),
-            //   color: context.colors.primary,
-            //   belowBarData: BarAreaData(
-            //     show: false,
-            //     // gradient: LinearGradient(
-            //     //   begin: Alignment.topCenter,
-            //     //   end: Alignment.bottomCenter,
-            //     //   colors: [
-            //     //     context.colors.primaryLight.withOpacity(.33),
-            //     //     context.colors.primaryLight,
-            //     //   ],
-            //     // ),
-            //   ),
-            // ),
-            lineBarData,
-            lineBarDataSuggested,
-          ],
+          bottomTitles: AxisTitles(
+            drawBelowEverything: false,
+            sideTitles: SideTitles(
+              showTitles: true,
+              interval: waterHistory.length > 1 ? intervalTimes : null,
+              getTitlesWidget: (value, meta) {
+                return Padding(
+                  padding: const EdgeInsets.only(top: 6),
+                  child: Text(
+                    DateTime.fromMillisecondsSinceEpoch(value.toInt()).toTime,
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                );
+              },
+            ),
+          ),
         ),
+        lineTouchData: LineTouchData(
+          touchSpotThreshold: 21,
+          getTouchedSpotIndicator: (barData, spotIndexes) => spotIndexes.map(
+            (spotIndex) {
+              return TouchedSpotIndicatorData(
+                FlLine(dashArray: [3, 6, 9], color: colorScheme.primary),
+                const FlDotData(),
+              );
+            },
+          ).toList(),
+          touchTooltipData: LineTouchTooltipData(
+            fitInsideHorizontally: true,
+            fitInsideVertically: true,
+            tooltipRoundedRadius: 6,
+            tooltipPadding: const EdgeInsets.symmetric(
+              horizontal: 9,
+              vertical: 3,
+            ),
+            getTooltipColor: (_) => colorScheme.surfaceContainerHigh,
+            getTooltipItems: (touchedSpots) {
+              return [
+                ...touchedSpots.map(
+                  (barSpot) {
+                    final flSpot = barSpot;
+                    if (flSpot.x == 0) return null;
+
+                    return LineTooltipItem(
+                      '',
+                      TextStyle(color: colorScheme.onSurface),
+                      textAlign: TextAlign.left,
+                      children: [
+                        TextSpan(
+                          text: '\u25CF\u00A0\u00A0',
+                          style: TextStyle(
+                            color: barSpot.bar.color,
+                          ),
+                        ),
+                        TextSpan(text: flSpot.y.toString()),
+                        const TextSpan(text: ' mL'),
+                      ],
+                    );
+                  },
+                )
+              ];
+            },
+          ),
+        ),
+        lineBarsData: [lineBarData, lineBarDataSuggested],
       ),
     );
   }
@@ -238,35 +216,6 @@ class _WaterHistoryState extends State<WaterHistory> {
           ),
         )
         .toList();
-  }
-
-  List<BarChartGroupData> _amountHistoryToBarChartGroupData(
-    List<model.WaterHistory> waterHistory,
-  ) {
-    return waterHistory.map(
-      (e) {
-        final amount = e.amount?.toDouble() ?? 0.0;
-        final suggested = e.suggestedAmount.toDouble();
-
-        return BarChartGroupData(
-          x: e.datetime.millisecondsSinceEpoch,
-          barRods: [
-            BarChartRodData(
-              toY: amount,
-              color: amountColor,
-              width: 5,
-            ),
-            BarChartRodData(
-              toY: suggested,
-              color: suggestedColor,
-              width: 5,
-            ),
-          ],
-          // showingTooltipIndicators: [0],
-          // groupVertically: true,
-        );
-      },
-    ).toList();
   }
 
   List<FlSpot> _suggestedAmountToFlSpots(
@@ -291,28 +240,33 @@ class _WaterHistoryState extends State<WaterHistory> {
     ]);
   }
 
-  // Widget _buildBarChart(List<model.WaterHistory> waterHistory) {
-  //   return BarChart(
-  //     BarChartData(
-  //       barGroups: _amountHistoryToBarChartGroupData(waterHistory),
-  //       borderData: FlBorderData(show: false),
-  //       barTouchData: BarTouchData(enabled: false),
-  //       titlesData: FlTitlesData(
-  //         leftTitles: const AxisTitles(),
-  //         topTitles: const AxisTitles(),
-  //         rightTitles: const AxisTitles(),
-  //         bottomTitles: AxisTitles(
-  //           sideTitles: SideTitles(
-  //             showTitles: true,
-  //             getTitlesWidget: (value, meta) => Text(
-  //               DateTime.fromMillisecondsSinceEpoch(value.toInt()).toTime,
-  //             ),
-  //           ),
-  //         ),
-  //       ),
-  //     ),
-  //   );
-  // }
+  Skeletonizer _buildLoading() {
+    return const Skeletonizer.zone(
+      child: Padding(
+        padding: EdgeInsets.all(12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                SizedBox.shrink(),
+                Bone.text(words: 2),
+                Bone.icon(),
+              ],
+            ),
+            SizedBox(height: 12),
+            Bone(
+              height: 210,
+              borderRadius: BorderRadius.all(
+                Radius.circular(9),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -349,10 +303,7 @@ class _WaterHistoryState extends State<WaterHistory> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
-                      'Histórico',
-                      style: Theme.of(context).textTheme.titleMedium,
-                    ),
+                    const SizedBox(width: 40),
                     Visibility(
                       visible: _loadOlderDateHistoryStore.loading,
                       replacement: (firstDate != null)
@@ -388,15 +339,8 @@ class _WaterHistoryState extends State<WaterHistory> {
                       children: [
                         IconButton(
                           onPressed: _onRefresh,
-                          // label: const Text('ATUALIZAR'),
                           tooltip: 'Atualizar',
                           icon: const Icon(Icons.refresh),
-                        ),
-                        IconButton(
-                          onPressed: () {},
-                          // label: const Text('EXPORTAR'),
-                          tooltip: 'Baixar dados',
-                          icon: const Icon(Icons.download),
                         ),
                       ],
                     ),
@@ -435,7 +379,7 @@ class _WaterHistoryState extends State<WaterHistory> {
                 if (!widget.toBreak) const Spacer(flex: 2),
               ],
             ),
-            child: const Center(child: CircularProgressIndicator()),
+            child: _buildLoading(),
           ),
         );
       },

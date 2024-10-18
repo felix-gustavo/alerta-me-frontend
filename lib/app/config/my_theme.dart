@@ -12,12 +12,10 @@ class MaterialTheme {
           bodyColor: colorScheme.onSurfaceVariant,
           displayColor: colorScheme.onSurfaceVariant,
         ),
-        scaffoldBackgroundColor: colorScheme.surface,
-        canvasColor: colorScheme.surface,
+        // scaffoldBackgroundColor: colorScheme.surface,
+        // canvasColor: colorScheme.surface,
         visualDensity: VisualDensity.compact,
-        iconTheme: IconThemeData(
-          color: colorScheme.onSecondaryContainer,
-        ),
+        iconTheme: IconThemeData(color: colorScheme.onSecondaryContainer),
         textButtonTheme: TextButtonThemeData(
           style: TextButton.styleFrom(
             shape: const RoundedRectangleBorder(
@@ -53,11 +51,14 @@ class MaterialTheme {
         ),
         cardTheme: CardTheme(
           margin: EdgeInsets.zero,
-          color: colorScheme.surfaceContainerLowest,
+          // color: colorScheme.surfaceContainerLowest,
           elevation: 3,
-          shadowColor: colorScheme.surface,
-          shape: const RoundedRectangleBorder(
-            borderRadius: BorderRadius.all(Radius.circular(9)),
+          shadowColor: colorScheme.shadow.withOpacity(.45),
+          shape: RoundedRectangleBorder(
+            side: BorderSide(
+              color: colorScheme.outlineVariant.withOpacity(.3),
+            ),
+            borderRadius: const BorderRadius.all(Radius.circular(9)),
           ),
         ),
         dialogTheme: const DialogTheme(
@@ -124,57 +125,6 @@ class MaterialTheme {
       surfaceContainerHighest: Color(0xffe1e2eb),
     );
   }
-
-  // static ColorScheme lightScheme() {
-  //   return const ColorScheme(
-  //     brightness: Brightness.light,
-  //     primary: Color(0xff3b608f),
-  //     surfaceTint: Color(0xff3b608f),
-  //     onPrimary: Color(0xffffffff),
-  //     primaryContainer: Color(0xffd4e3ff),
-  //     onPrimaryContainer: Color(0xff001c39),
-  //     secondary: Color(0xff226a4c),
-  //     onSecondary: Color(0xffffffff),
-  //     secondaryContainer: Color(0xffaaf2cc),
-  //     onSecondaryContainer: Color(0xff002114),
-  //     tertiary: Color(0xff615690),
-  //     onTertiary: Color(0xffffffff),
-  //     tertiaryContainer: Color(0xffe6deff),
-  //     onTertiaryContainer: Color(0xff1d1148),
-  //     error: Color(0xffba1a1a),
-  //     onError: Color(0xffffffff),
-  //     errorContainer: Color(0xffffdad6),
-  //     onErrorContainer: Color(0xff410002),
-  //     surface: Color(0xfff8f9ff),
-  //     onSurface: Color(0xff191c20),
-  //     onSurfaceVariant: Color(0xff43474e),
-  //     outline: Color(0xff73777f),
-  //     outlineVariant: Color(0xffc3c6cf),
-  //     shadow: Color(0xff000000),
-  //     scrim: Color(0xff000000),
-  //     inverseSurface: Color(0xff2e3035),
-  //     inversePrimary: Color(0xffa4c9fe),
-  //     primaryFixed: Color(0xffd4e3ff),
-  //     onPrimaryFixed: Color(0xff001c39),
-  //     primaryFixedDim: Color(0xffa4c9fe),
-  //     onPrimaryFixedVariant: Color(0xff204876),
-  //     secondaryFixed: Color(0xffaaf2cc),
-  //     onSecondaryFixed: Color(0xff002114),
-  //     secondaryFixedDim: Color(0xff8ed5b1),
-  //     onSecondaryFixedVariant: Color(0xff005236),
-  //     tertiaryFixed: Color(0xffe6deff),
-  //     onTertiaryFixed: Color(0xff1d1148),
-  //     tertiaryFixedDim: Color(0xffcbbeff),
-  //     onTertiaryFixedVariant: Color(0xff493e76),
-  //     surfaceDim: Color(0xffd9dae0),
-  //     surfaceBright: Color(0xfff8f9ff),
-  //     surfaceContainerLowest: Color(0xffffffff),
-  //     surfaceContainerLow: Color(0xfff2f3fa),
-  //     surfaceContainer: Color(0xffededf4),
-  //     surfaceContainerHigh: Color(0xffe7e8ee),
-  //     surfaceContainerHighest: Color(0xffe1e2e9),
-  //   );
-  // }
 
   ThemeData light() {
     return _theme(lightScheme());

@@ -9,7 +9,7 @@ import '../ui/pages/not_found_page/index.dart';
 GoRouter getRouter() => GoRouter(
       initialLocation: '/home',
       redirect: (context, goRouterState) async {
-        final isLoginRoute = goRouterState.location == '/login';
+        final isLoginRoute = goRouterState.matchedLocation == '/login';
 
         if (FirebaseAuth.instance.currentUser == null) {
           return isLoginRoute ? null : '/login';

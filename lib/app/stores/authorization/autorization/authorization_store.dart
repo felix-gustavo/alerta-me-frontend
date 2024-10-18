@@ -36,7 +36,6 @@ abstract class AuthorizationStoreBase with Store {
       errorMessage = null;
 
       final accessToken = await _auth.currentUser?.getIdToken();
-      print(accessToken);
       if (accessToken == null) throw SessionExpiredException();
 
       _future = ObservableFuture(_service.getAuthorization(accessToken));

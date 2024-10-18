@@ -5,11 +5,10 @@ class ActiveSwitch extends StatelessWidget {
   final bool value;
 
   const ActiveSwitch({
-    Key? key,
+    super.key,
     required void Function(bool value) onChangeActive,
     required this.value,
-  })  : _onChangeActive = onChangeActive,
-        super(key: key);
+  }) : _onChangeActive = onChangeActive;
 
   @override
   Widget build(BuildContext context) {

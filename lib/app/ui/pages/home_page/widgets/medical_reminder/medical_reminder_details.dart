@@ -15,8 +15,7 @@ import 'medical_reminder_card_edit.dart';
 class MedicalReminderDetails extends StatefulWidget {
   final MedicalReminder medicalReminder;
 
-  const MedicalReminderDetails({Key? key, required this.medicalReminder})
-      : super(key: key);
+  const MedicalReminderDetails({super.key, required this.medicalReminder});
 
   @override
   State<MedicalReminderDetails> createState() => _MedicalReminderDetailsState();
@@ -130,7 +129,7 @@ class _MedicalReminderDetailsState extends State<MedicalReminderDetails> {
               onExpansionChanged: (_) {
                 setState(() => _isExpanded = !_isExpanded);
               },
-              collapsedBackgroundColor: colorScheme.surfaceContainerLowest,
+              // collapsedBackgroundColor: colorScheme.surfaceContainerLowest,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(9),
                 side: BorderSide(

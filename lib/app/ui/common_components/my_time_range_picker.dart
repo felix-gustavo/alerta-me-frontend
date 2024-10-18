@@ -13,22 +13,20 @@ class MyTimeRangePicker extends StatefulWidget {
   final void Function(TimeOfDay end)? onEndChange;
 
   const MyTimeRangePicker({
-    Key? key,
+    super.key,
     required this.start,
     required this.end,
     this.onStartChange,
     this.onEndChange,
-  })  : readonly = false,
-        super(key: key);
+  }) : readonly = false;
 
   const MyTimeRangePicker.readonly({
-    Key? key,
+    super.key,
     required this.start,
     required this.end,
     this.onStartChange,
     this.onEndChange,
-  })  : readonly = true,
-        super(key: key);
+  }) : readonly = true;
 
   @override
   State<MyTimeRangePicker> createState() => _MyTimeRangePickerState();

@@ -10,9 +10,9 @@ class MedicationReminderCard extends StatefulWidget {
   final MedicationReminder medicationReminder;
 
   const MedicationReminderCard({
-    Key? key,
+    super.key,
     required this.medicationReminder,
-  }) : super(key: key);
+  });
 
   @override
   State<MedicationReminderCard> createState() => _MedicationReminderCardState();
@@ -21,28 +21,16 @@ class MedicationReminderCard extends StatefulWidget {
 class _MedicationReminderCardState extends State<MedicationReminderCard> {
   bool isHovered = false;
 
-  Widget _buildChipTime(Dosage dosage) {
-    // final textTheme = Theme.of(context).textTheme;
-
-    return Container(
-      padding: const EdgeInsets.all(3),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(3),
-        // color: context.colors.primaryLight,
-      ),
-      child: Text(
-        dosage.time.toHHMM,
-        textAlign: TextAlign.center,
-        // style: textTheme.bodyMedium!.copyWith(
-        //   color: context.colors.primary,
-        // ),
-      ),
-    );
-  }
+  Widget _buildChipTime(Dosage dosage) => Container(
+        padding: const EdgeInsets.all(3),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(3),
+        ),
+        child: Text(dosage.time.toHHMM, textAlign: TextAlign.center),
+      );
 
   @override
   Widget build(BuildContext context) {
-    print('MedicationReminderCard');
     final textTheme = Theme.of(context).textTheme;
 
     final hasDosages = widget.medicationReminder.dose.entries
@@ -53,7 +41,6 @@ class _MedicationReminderCardState extends State<MedicationReminderCard> {
       duration: const Duration(milliseconds: 99),
       child: Card(
         margin: EdgeInsets.zero,
-        // shadowColor: isHovered ? context.colors.primary : null,
         child: InkWell(
           overlayColor: const WidgetStatePropertyAll(Colors.transparent),
           onHover: (value) => setState(() => isHovered = value),
@@ -104,9 +91,6 @@ class _MedicationReminderCardState extends State<MedicationReminderCard> {
                                   Text(
                                     entry.key.namePtBrShort,
                                     textAlign: TextAlign.center,
-                                    // style: textTheme.bodyMedium!.copyWith(
-                                    //   color: context.colors.grey,
-                                    // ),
                                   ),
                                   const SizedBox(height: 6),
                                   ...entry.value
@@ -127,7 +111,6 @@ class _MedicationReminderCardState extends State<MedicationReminderCard> {
                                   if ((entry.value?.length ?? 0) > 2)
                                     const Icon(
                                       Icons.more_vert,
-                                      // color: context.colors.grey,
                                       size: 15,
                                     ),
                                 ],
@@ -137,12 +120,7 @@ class _MedicationReminderCardState extends State<MedicationReminderCard> {
                         )
                       ],
                     ),
-                    child: const Text(
-                      'Não há dosagens configuradas',
-                      // style: textTheme.bodyMedium!.copyWith(
-                      //   color: context.colors.grey,
-                      // ),
-                    ),
+                    child: const Text('Não há dosagens configuradas'),
                   ),
                 ),
                 const Spacer(flex: 4),

@@ -10,22 +10,20 @@ class MyDialog extends StatelessWidget {
   final VoidCallback? action;
 
   const MyDialog({
-    Key? key,
+    super.key,
     required this.child,
     required this.title,
     this.canPop = false,
   })  : loading = null,
-        action = null,
-        super(key: key);
+        action = null;
 
   const MyDialog.confirm({
-    Key? key,
+    super.key,
     required this.child,
     required this.loading,
     required this.action,
     required this.title,
-  })  : canPop = true,
-        super(key: key);
+  }) : canPop = true;
 
   @override
   Widget build(BuildContext context) {

@@ -17,13 +17,13 @@ class MedicationReminderDoseSection extends StatefulWidget {
   final Map<Weekday, bool> activated;
 
   const MedicationReminderDoseSection({
-    Key? key,
+    super.key,
     required this.dosageUnit,
     required this.dose,
     required this.onExpand,
     required this.onChangeDose,
     required this.activated,
-  }) : super(key: key);
+  });
 
   @override
   State<MedicationReminderDoseSection> createState() =>
@@ -210,24 +210,6 @@ class _MedicationReminderDoseSectionState
               const Divider(height: 1),
               TextFormField(
                 controller: _textEC[weekday]?[index],
-                // onSaved: (value) {
-                //   if (value != null && value.isNotEmpty) {
-                //     final newValue = int.parse(value);
-                //     if (dosage.amount != newValue) {
-                //       final newDosage = Dosage(
-                //         time: dosage.time,
-                //         amount: newValue,
-                //       );
-
-                //       final copy = [...?(widget.dose[weekday])];
-
-                //       copy.removeAt(index);
-                //       copy.insert(index, newDosage);
-
-                //       widget.onChangeDose(weekday: weekday, dosage: copy);
-                //     }
-                //   }
-                // },
                 textAlign: TextAlign.center,
                 style: textTheme.bodyMedium!.copyWith(
                   color: Theme.of(context).colorScheme.primary,
@@ -271,7 +253,6 @@ class _MedicationReminderDoseSectionState
 
   @override
   Widget build(BuildContext context) {
-    print('MedicationReminderDoseSection');
     final textTheme = Theme.of(context).textTheme;
 
     return Column(
@@ -295,7 +276,6 @@ class _MedicationReminderDoseSectionState
                 size: 18,
               ),
               textColor: colorScheme.primary,
-              // collapsedBackgroundColor: colorScheme.surfaceContainerLow,
               backgroundColor: colorScheme.surfaceContainerLowest,
               expandedCrossAxisAlignment: CrossAxisAlignment.start,
               tilePadding: const EdgeInsets.only(left: 15, right: 9),

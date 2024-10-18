@@ -17,10 +17,10 @@ class MedicalReminderEditWidget extends StatefulWidget {
   final MedicalReminder? medicalReminder;
 
   const MedicalReminderEditWidget({
-    Key? key,
+    super.key,
     this.onChangeMedical,
     this.medicalReminder,
-  }) : super(key: key);
+  });
 
   @override
   State<MedicalReminderEditWidget> createState() =>

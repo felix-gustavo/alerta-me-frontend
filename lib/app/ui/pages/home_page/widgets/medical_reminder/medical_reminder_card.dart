@@ -11,11 +11,11 @@ class MedicalReminderCard extends StatefulWidget {
   final bool details;
 
   const MedicalReminderCard({
-    Key? key,
+    super.key,
     required this.medicalReminder,
     this.isHover = false,
     this.details = true,
-  }) : super(key: key);
+  });
 
   @override
   State<MedicalReminderCard> createState() => _MedicalReminderCardState();
@@ -37,7 +37,6 @@ class _MedicalReminderCardState extends State<MedicalReminderCard> {
         duration: const Duration(milliseconds: 99),
         child: Card(
           margin: EdgeInsets.zero,
-          // shadowColor: widget.isHover ? context.colors.primary : null,
           child: Padding(
             padding: const EdgeInsets.all(12),
             child: Column(
@@ -57,9 +56,6 @@ class _MedicalReminderCardState extends State<MedicalReminderCard> {
                     const SizedBox(height: 3),
                     Text(
                       widget.medicalReminder.specialty,
-                      style: textTheme.bodyMedium!.copyWith(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
                       textAlign: TextAlign.justify,
                       overflow: widget.details ? null : TextOverflow.ellipsis,
                     ),
@@ -102,9 +98,6 @@ class _MedicalReminderCardState extends State<MedicalReminderCard> {
                 ),
                 Text(
                   widget.medicalReminder.address,
-                  style: textTheme.bodyMedium!.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
                   textAlign: TextAlign.justify,
                   overflow: widget.details ? null : TextOverflow.ellipsis,
                 ),

@@ -16,8 +16,6 @@ class WaterHistoryServiceImpl implements IWaterHistoryService {
 
   @override
   Future<List<WaterHistory>> getAll(DateTime date) async {
-    print('chamou api /water-reminders/history/user');
-
     final accessToken = await _auth.currentUser?.getIdToken();
     if (accessToken == null) throw SessionExpiredException();
 
@@ -34,8 +32,6 @@ class WaterHistoryServiceImpl implements IWaterHistoryService {
 
   @override
   Future<DateTime> getOlderDateHistory() async {
-    print('chamou api /water-reminders/older-date/history/user');
-
     final accessToken = await _auth.currentUser?.getIdToken();
     if (accessToken == null) throw SessionExpiredException();
 

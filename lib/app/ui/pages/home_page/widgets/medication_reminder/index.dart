@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:provider/provider.dart';
-// import 'package:skeletons/skeletons.dart';
 
 import '../../../../../model/authorizations.dart';
 import '../../../../../model/medication_reminder.dart';
@@ -25,7 +24,6 @@ class MedicationReminderWidget extends StatefulWidget {
 class _MedicationReminderWidgetState extends State<MedicationReminderWidget> {
   late final AuthorizationStore _authorizationStore;
   late final LoadMedicationReminderStore _loadMedicationReminderStore;
-  // late final ScrollController _remindersScollController = ScrollController();
 
   @override
   void initState() {
@@ -41,23 +39,6 @@ class _MedicationReminderWidgetState extends State<MedicationReminderWidget> {
       listen: false,
     );
   }
-
-  @override
-  void dispose() {
-    // _remindersScollController.dispose();
-    super.dispose();
-  }
-
-  // Widget _buildLoading() {
-  //   return Column(
-  //     children: [
-  //       const SkeletonLine(style: SkeletonLineStyle(width: 135)),
-  //       const SkeletonLine(),
-  //       const SkeletonLine(),
-  //       const SkeletonLine(),
-  //     ].separator(const SizedBox(height: 6)).toList(),
-  //   );
-  // }
 
   Future<void> _add() => showDialog(
         context: context,
@@ -100,9 +81,25 @@ class _MedicationReminderWidgetState extends State<MedicationReminderWidget> {
             visible: medicationReminders.isNotEmpty,
             replacement: Padding(
               padding: const EdgeInsets.all(12),
-              child: Text(
-                'Sem lembretes',
-                style: Theme.of(context).textTheme.bodyMedium,
+              child: IntrinsicHeight(
+                child: Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.sticky_note_2_outlined,
+                        size: context.isMobile ? 45 : 72,
+                        color: Theme.of(context).colorScheme.outlineVariant,
+                      ),
+                      Text(
+                        'Sem lembretes',
+                        style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                              color: Theme.of(context).colorScheme.outline,
+                            ),
+                      ),
+                    ],
+                  ),
+                ),
               ),
             ),
             child: Padding(
@@ -113,14 +110,12 @@ class _MedicationReminderWidgetState extends State<MedicationReminderWidget> {
               ),
               child: LayoutBuilder(
                 builder: (context, constraints) {
-                  final width = constraints.maxWidth;
-                  final nameColWidth = width * .5;
-                  final weekColWidth =
-                      (width * .5) / (Weekday.values.length + 1);
+                  final width = constraints.maxWidth - 15;
+                  final nameColWidth = width * .4;
+                  final weekColWidth = (width * .6) / Weekday.values.length;
 
                   return SingleChildScrollView(
                     padding: const EdgeInsets.only(right: 15),
-                    // scrollDirection: Axis.horizontal,
                     child: DataTable(
                       columnSpacing: 0,
                       horizontalMargin: 0,
@@ -145,9 +140,6 @@ class _MedicationReminderWidgetState extends State<MedicationReminderWidget> {
                             ),
                           ),
                         ),
-                        // const DataColumn(label: SizedBox.shrink())
-                        // DataColumn(label: SizedBox(width: (width * .04) - 21)),
-                        DataColumn(label: SizedBox(width: weekColWidth)),
                       ],
                       rows: [
                         ...medicationReminders.map(
@@ -189,17 +181,6 @@ class _MedicationReminderWidgetState extends State<MedicationReminderWidget> {
                                   );
                                 },
                               ),
-                              DataCell(
-                                Center(
-                                  child: Tooltip(
-                                    message: 'Desativado',
-                                    child: Icon(
-                                      Icons.alarm_off_outlined,
-                                      size: context.isMobile ? 18 : null,
-                                    ),
-                                  ),
-                                ),
-                              ),
                             ],
                           ),
                         )
@@ -217,7 +198,7 @@ class _MedicationReminderWidgetState extends State<MedicationReminderWidget> {
           title: 'Lembretes de Medicamentos',
           page: widget.toBreak
               ? ConstrainedBox(
-                  constraints: const BoxConstraints(maxHeight: 600),
+                  constraints: const BoxConstraints(maxHeight: 330),
                   child: content,
                 )
               : Expanded(child: content),

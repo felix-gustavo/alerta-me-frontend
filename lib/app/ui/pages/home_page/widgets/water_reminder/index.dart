@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:provider/provider.dart';
+import 'package:skeletonizer/skeletonizer.dart';
 
 import '../../../../../model/authorizations.dart';
+import '../../../../../shared/extensions/app_styles_extension.dart';
+import '../../../../../shared/extensions/iterable_extension.dart';
 import '../../../../../stores/authorization/autorization/authorization_store.dart';
 import '../../../../../stores/water_reminder/load_water_reminder/load_water_reminder_store.dart';
 import '../../../../common_components/container_reminder.dart';
@@ -10,7 +13,7 @@ import 'water_reminder_content.dart';
 import 'water_reminder_edit.dart';
 
 class WaterReminderWidget extends StatefulWidget {
-  const WaterReminderWidget({Key? key}) : super(key: key);
+  const WaterReminderWidget({super.key});
 
   @override
   State<WaterReminderWidget> createState() => _WaterReminderWidgetState();
@@ -35,51 +38,123 @@ class _WaterReminderWidgetState extends State<WaterReminderWidget>
     );
   }
 
-  // Widget _buildLoading() {
-  //   return Column(
-  //     children: [
-  //       const SkeletonLine(style: SkeletonLineStyle(width: 135)),
-  //       const SkeletonLine(),
-  //       const SkeletonLine(),
-  //       const SkeletonLine(),
-  //     ].separator(const SizedBox(height: 6)).toList(),
-  //   );
-  // }
-
-  // Widget _buildConfigWaterReminderButton(bool? active) {
-  //   return Row(
-  //     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-  //     children: [
-  //       IconButton(
-  //         // onPressed: ,
-  //         icon: const Icon(Icons.edit_outlined),
-  //         splashRadius: 18,
-  //         tooltip: !authorizationApproved
-  //             ? 'Vincule-se a uma pessoa idosa para configurar este lembrete'
-  //             : null,
-  //       ),
-  //       if (!(active ?? false))
-  //         const Tooltip(
-  //           message: 'Lembrete desativado',
-  //           child: Padding(
-  //             padding: EdgeInsets.only(right: 6),
-  //             child: Icon(
-  //               Icons.warning_amber_rounded,
-  //               size: 24,
-  //               // color: context.colors.grey,
-  //             ),
-  //           ),
-  //         )
-  //     ],
-  //   );
-  // }
-
   Future<void> _edit() => showDialog(
         context: context,
         builder: (_) => WaterReminderEditWidget(
           _loadWaterReminderStore.waterReminder,
         ),
       );
+
+  Skeletonizer _buildLoading() {
+    final toBreak = context.screenWidth < 940;
+
+    final children = [
+      SizedBox(
+        width: 435,
+        child: Card(
+          child: Padding(
+            padding: const EdgeInsets.all(12),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Expanded(
+                  child: Bone(
+                    height: 300,
+                    borderRadius: BorderRadius.all(Radius.circular(9)),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Column(
+                  children: [
+                    const Bone(
+                      height: 69,
+                      width: 99,
+                      borderRadius: BorderRadius.all(
+                        Radius.circular(9),
+                      ),
+                    ),
+                    const Bone(
+                      height: 69,
+                      width: 99,
+                      borderRadius: BorderRadius.all(
+                        Radius.circular(9),
+                      ),
+                    ),
+                    const Bone(
+                      height: 69,
+                      width: 99,
+                      borderRadius: BorderRadius.all(
+                        Radius.circular(9),
+                      ),
+                    ),
+                  ].separator(const SizedBox(height: 12)),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+      const SizedBox.square(dimension: 12),
+      Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Card(
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.all(12),
+              child: Row(
+                children: [
+                  const Bone.icon(),
+                  const Bone.icon(),
+                  const Bone.icon(),
+                  const Bone.icon(),
+                  const Bone.icon(),
+                  const Bone.icon(),
+                ].separator(const Bone(height: 6, width: 90)),
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
+          const Card(
+            child: Padding(
+              padding: EdgeInsets.all(12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      SizedBox.shrink(),
+                      Bone.text(words: 2),
+                      Bone.icon(),
+                    ],
+                  ),
+                  SizedBox(height: 12),
+                  Bone(
+                    height: 210,
+                    borderRadius: BorderRadius.all(
+                      Radius.circular(9),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          )
+        ],
+      ),
+    ];
+    return Skeletonizer.zone(
+      child: toBreak
+          ? Column(children: children)
+          : Row(
+              children: [
+                ...children.getRange(0, children.length - 1),
+                Flexible(child: children.last),
+              ],
+            ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -94,11 +169,11 @@ class _WaterReminderWidgetState extends State<WaterReminderWidget>
           // active: waterReminder?.active ?? false,
           onPressed: authorizationApproved ? _edit : null,
           page: _loadWaterReminderStore.loading
-              ? const Card(
+              ? Card(
                   child: Center(
                     child: Padding(
-                      padding: EdgeInsets.all(33),
-                      child: CircularProgressIndicator(),
+                      padding: const EdgeInsets.all(33),
+                      child: _buildLoading(),
                     ),
                   ),
                 )

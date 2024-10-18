@@ -12,9 +12,7 @@ import 'stores/brightness/brightness_store.dart';
 
 class App extends StatelessWidget {
   final GoRouter _router;
-  const App({Key? key, required GoRouter router})
-      : _router = router,
-        super(key: key);
+  const App({super.key, required GoRouter router}) : _router = router;
 
   @override
   Widget build(BuildContext context) {

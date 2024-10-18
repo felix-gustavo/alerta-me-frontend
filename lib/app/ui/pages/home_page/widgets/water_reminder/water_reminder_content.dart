@@ -40,74 +40,76 @@ class WaterReminderContent extends StatelessWidget {
       Card(
         child: Padding(
           padding: EdgeInsets.all(spacing),
-          child: LayoutBuilder(builder: (context, c) {
-            return Wrap(
-              spacing: spacing,
-              runSpacing: spacing,
-              alignment: WrapAlignment.center,
-              // crossAxisAlignment: WrapCrossAlignment.center,
-              runAlignment: WrapAlignment.center,
-              children: [
-                SizedBox(
-                  height: toBreak ? null : c.maxHeight,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      MyTimeRangePicker.readonly(
-                        key: ValueKey(range),
-                        start: startTime,
-                        end: endTime,
-                      ),
-                      SizedBox(height: spacing),
-                      Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            waterReminder.active
-                                ? Icons.alarm_on
-                                : Icons.alarm_off_outlined,
-                          ),
-                          const SizedBox(width: 9),
-                          Text(
-                            'Lembrete ${waterReminder.active ? 'ativado' : 'desativado'}',
-                          ),
-                        ],
-                      ),
-                    ],
+          child: LayoutBuilder(
+            builder: (context, c) {
+              return Wrap(
+                spacing: spacing,
+                runSpacing: spacing,
+                alignment: WrapAlignment.center,
+                // crossAxisAlignment: WrapCrossAlignment.center,
+                runAlignment: WrapAlignment.center,
+                children: [
+                  SizedBox(
+                    height: toBreak ? null : c.maxHeight,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        MyTimeRangePicker.readonly(
+                          key: ValueKey(range),
+                          start: startTime,
+                          end: endTime,
+                        ),
+                        SizedBox(height: spacing),
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              waterReminder.active
+                                  ? Icons.alarm_on
+                                  : Icons.alarm_off_outlined,
+                            ),
+                            const SizedBox(width: 9),
+                            Text(
+                              'Lembrete ${waterReminder.active ? 'ativado' : 'desativado'}',
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-                SizedBox(
-                  height: toBreak ? null : c.maxHeight,
-                  child: Column(
-                    children: [
-                      CardInfo(
-                        label: 'Água total',
-                        value: amount,
-                        unit: 'L',
-                      ),
-                      CardInfo(
-                        label: 'Intervalo',
-                        value: waterReminder.interval.toString(),
-                        unit: 'min',
-                      ),
-                      // CardInfo(
-                      //   label: 'Lembretes',
-                      //   value: amountReminders.ceil().toString(),
-                      // ),
-                      CardInfo(
-                        label: 'Sugestão',
-                        value: (waterReminder.amount / amountReminders.ceil())
-                            .floor()
-                            .toString(),
-                        unit: 'mL',
-                      ),
-                      // ],
-                    ].separator(SizedBox(height: spacing)),
+                  SizedBox(
+                    height: toBreak ? null : c.maxHeight,
+                    child: Column(
+                      children: [
+                        CardInfo(
+                          label: 'Água total',
+                          value: amount,
+                          unit: 'L',
+                        ),
+                        CardInfo(
+                          label: 'Intervalo',
+                          value: waterReminder.interval.toString(),
+                          unit: 'min',
+                        ),
+                        // CardInfo(
+                        //   label: 'Lembretes',
+                        //   value: amountReminders.ceil().toString(),
+                        // ),
+                        CardInfo(
+                          label: 'Sugestão',
+                          value: (waterReminder.amount / amountReminders.ceil())
+                              .floor()
+                              .toString(),
+                          unit: 'mL',
+                        ),
+                        // ],
+                      ].separator(SizedBox(height: spacing)),
+                    ),
                   ),
-                ),
-              ],
-            );
-          }),
+                ],
+              );
+            },
+          ),
         ),
       ),
       const SizedBox.square(dimension: 12),

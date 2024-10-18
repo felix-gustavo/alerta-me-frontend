@@ -273,7 +273,7 @@ class _MedicalReminderCardEditState extends State<MedicalReminderCardEdit> {
                 ),
               ),
             ),
-            const SizedBox(height: 6),
+            const SizedBox(height: 12),
             Text(
               'Clique no campo que deseja alterar',
               style: textTheme.labelMedium!.copyWith(

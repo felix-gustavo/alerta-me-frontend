@@ -9,11 +9,11 @@ class CardInfo extends StatelessWidget {
   final String? unit;
 
   const CardInfo({
-    Key? key,
+    super.key,
     required this.label,
     required this.value,
     this.unit,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

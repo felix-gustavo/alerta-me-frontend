@@ -13,9 +13,9 @@ class MedicationReminderEditWidget extends StatefulWidget {
   final MedicationReminder? medicationReminder;
 
   const MedicationReminderEditWidget({
-    Key? key,
+    super.key,
     this.medicationReminder,
-  }) : super(key: key);
+  });
 
   @override
   State<MedicationReminderEditWidget> createState() =>
@@ -38,7 +38,6 @@ class _MedicationReminderEditWidgetState
   late final ReactionDisposer _disposer;
 
   late final Map<Weekday, bool> _isActivated;
-  // late PageController _pageController;
   late int _currentPage;
 
   @override
@@ -132,7 +131,6 @@ class _MedicationReminderEditWidgetState
   }
 
   Future<void> _submit() async {
-    print('submit: ');
     final formValid = _formKey.currentState?.validate() ?? false;
 
     if (formValid) {
@@ -183,8 +181,6 @@ class _MedicationReminderEditWidgetState
 
   @override
   Widget build(BuildContext context) {
-    print('Medication_reminder_edit: ${_medicationReminder.dose}');
-
     return Form(
       key: _formKey,
       child: Stepper(

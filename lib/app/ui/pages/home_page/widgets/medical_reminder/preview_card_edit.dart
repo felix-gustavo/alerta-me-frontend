@@ -11,14 +11,13 @@ class PreviewCardEdit extends StatefulWidget {
   final bool _isEdit;
 
   const PreviewCardEdit({
-    Key? key,
+    super.key,
     required MedicalReminder medicalReminder,
     required MedicalReminder medicalReminderEdit,
     required bool isEdit,
   })  : _medicalReminder = medicalReminder,
         _medicalReminderEdit = medicalReminderEdit,
-        _isEdit = isEdit,
-        super(key: key);
+        _isEdit = isEdit;
 
   @override
   State<PreviewCardEdit> createState() => _PreviewCardEditState();

@@ -6,11 +6,11 @@ class ContainerReminder extends StatelessWidget {
   final void Function()? onPressed;
 
   const ContainerReminder({
-    Key? key,
+    super.key,
     required this.onPressed,
     required this.page,
     required this.title,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
